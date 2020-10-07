@@ -21,10 +21,17 @@ public class BioActivityGraphDisplayer extends ReportDisplayer {
   /* log output printed to catalina.out */
   protected static final Logger LOG = Logger.getLogger(BioActivityGraphDisplayer.class);
 
+  /**
+   * constructor
+   * Use super class to define required structures
+   */
 	public BioActivityGraphDisplayer(ReportDisplayerConfig config, InterMineAPI im) {
 		super(config, im);
 	}
 
+  /**
+   *
+   */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void display(HttpServletRequest request, ReportObject reportObject) {
@@ -65,9 +72,13 @@ public class BioActivityGraphDisplayer extends ReportDisplayer {
           for( InterMineObject activity: activities){
             String type = (String) activity.getFieldValue("type");
             float concentration = (Float) activity.getFieldValue("conc");
+            String unit = (String) activity.getFieldValue("unit");
+            String relation = (String) activity.getFieldValue("relation");
             /* create a row with all the relevant information */
             //data.add(primaryAccession+"\t"+dbIdentifier+"\t"+organismName+"\t"+type+"\t"+concentration);
-            data.add(primaryAccession+"\t"+geneSymbol+"\t"+organismName+"\t"+type+"\t"+concentration);
+            if( unit.equals("nM") && relation.equals("=") ){
+              data.add(primaryAccession+"\t"+geneSymbol+"\t"+organismName+"\t"+type+"\t"+concentration);
+            }
           } // for activity
         }// if
       } // for interaction

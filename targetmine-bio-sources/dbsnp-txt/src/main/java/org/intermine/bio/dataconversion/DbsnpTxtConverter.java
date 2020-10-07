@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.intermine.dataconversion.ItemWriter;
 import org.intermine.metadata.Model;
 import org.intermine.objectstore.ObjectStore;
@@ -33,7 +34,7 @@ import org.intermine.xml.full.Item;
  */
 public class DbsnpTxtConverter extends BioFileConverter
 {
-	private static final Logger LOG = Logger.getLogger(DbsnpTxtConverter.class);
+	private static final Logger LOG = LogManager.getLogger(DbsnpTxtConverter.class);
 	//
     private static final String DATASET_TITLE = "dbSNP";
     private static final String DATA_SOURCE_NAME = "NCBI";
@@ -160,7 +161,9 @@ public class DbsnpTxtConverter extends BioFileConverter
 				if (!StringUtils.isEmpty(pubmedIdString)) {
 					String[] ids = pubmedIdString.split(";");
 					for (String id : ids) {
-						item.addToCollection("publications", getPublication(id));
+						if (isValidId(id)) {
+							item.addToCollection("publications", getPublication(id));
+						}
 					}
 				}
 				store(item);
@@ -397,6 +400,19 @@ public class DbsnpTxtConverter extends BioFileConverter
 			ResultsRow<String> rr = (ResultsRow<String>) iterator.next();
 			snpIdSet.add(rr.get(0));
 		}
+	}
+
+	public static boolean isValidId(String s) {
+		if (s == null || s.isEmpty())
+			return false;
+		for (int i = 0; i < s.length(); i++) {
+			if (i == 0 && s.charAt(i) == '0') {
+				return false;
+			}
+			if (Character.digit(s.charAt(i), 10) < 0)
+				return false;
+		}
+		return true;
 	}
 
 }

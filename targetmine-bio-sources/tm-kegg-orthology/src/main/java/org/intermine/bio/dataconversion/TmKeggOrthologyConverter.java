@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.intermine.dataconversion.ItemWriter;
 import org.intermine.metadata.Model;
 import org.intermine.objectstore.ObjectStoreException;
@@ -24,7 +25,7 @@ import org.intermine.xml.full.Item;
  * @author chenyian
  */
 public class TmKeggOrthologyConverter extends BioFileConverter {
-	protected static final Logger LOG = Logger.getLogger(TmKeggOrthologyConverter.class);
+	protected static final Logger LOG = LogManager.getLogger(TmKeggOrthologyConverter.class);
 	//
 	private static final String DATASET_TITLE = "KEGG Orthology";
 	private static final String DATA_SOURCE_NAME = "KEGG";
@@ -99,7 +100,11 @@ public class TmKeggOrthologyConverter extends BioFileConverter {
 						continue;
 					}
 				}
-				item.addToCollection("genes", getGene(geneId, taxonId));
+				if (isInteger(geneId)) {
+					item.addToCollection("genes", getGene(geneId, taxonId));
+				} else {
+					LOG.info(String.format("Not a valid Gene ID: %s in %s, skip this one.", gene, koId));
+				}
 			}
 			store(item);
 		}
@@ -147,4 +152,25 @@ public class TmKeggOrthologyConverter extends BioFileConverter {
 			flyIdMap.put(cols[3], cols[1]);
 		}
 	}
+
+	public static boolean isInteger(String s) {
+		return isInteger(s, 10);
+	}
+
+	public static boolean isInteger(String s, int radix) {
+		if (s.isEmpty())
+			return false;
+		for (int i = 0; i < s.length(); i++) {
+			if (i == 0 && s.charAt(i) == '-') {
+				if (s.length() == 1)
+					return false;
+				else
+					continue;
+			}
+			if (Character.digit(s.charAt(i), radix) < 0)
+				return false;
+		}
+		return true;
+	}
+
 }

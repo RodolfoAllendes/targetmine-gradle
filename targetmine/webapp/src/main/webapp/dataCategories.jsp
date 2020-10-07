@@ -10,10 +10,10 @@
 
 <div class="body">
 
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
 		<!-- DataTables -->
-		<script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+		<script src="https://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
 		
         <script type="text/javascript">
 		
@@ -30,7 +30,7 @@
 								"DrugBank": ["-","-","-","V","-","-","-","-","-","-","-","V"],
 								"DrugEBIlity": ["-","V","-","-","-","-","-","-","-","-","-","-"],
 								"ENCODE ChIP-seq data": ["-","-","-","-","-","-","-","-","V","-","-","-"],
-								"Entrez Gene": ["V","-","-","-","-","-","-","-","-","-","-","-"],
+								"Gene": ["V","-","-","-","-","-","-","-","-","V","-","-"],
 								"ENZYME": ["-","V","-","-","-","-","-","-","-","-","-","-"],
 								"Gene3D": ["-","-","V","-","-","-","-","-","-","-","-","-"],
 								"GOSTAR": ["-","-","-","V","-","-","-","-","-","-","-","V"],
@@ -45,7 +45,7 @@
 								"NCI Pathway Interaction Database": ["-","-","-","-","-","-","V","-","-","-","-","-"],
 								"NetAffx Annotation Files": ["V","-","-","-","-","-","-","-","-","-","-","-"],
 								"GWAS Catalog": ["-","-","-","-","-","-","-","-","-","V","-","-"],
-								"OMIM": ["-","-","-","-","-","-","-","-","-","V","-","-"],
+								"Orphanet": ["-","-","-","-","-","-","-","-","-","V","-","-"],
 								"ORegAnno": ["-","-","-","-","-","-","-","-","V","-","-","-"],
 								"Reactome": ["-","-","-","-","-","-","V","-","-","-","-","-"],
 								"SCOP": ["-","-","V","-","-","-","-","-","-","-","-","-"],
@@ -143,7 +143,7 @@
 			<dt>
 	        	<h1 id="">Integrated data in TargetMine</h1>
 	        </dt>
-			<dd><p>This page lists all data sets loaded along with the date the data was released or downloaded. Check <a href="http://targetmine.mizuguchilab.org/documentation/list-of-data-sources" target="_blank">here</a> for other details.</p></dd>
+			<dd><p>This page lists all data sets loaded along with the date the data was released or downloaded. Check <a href="https://targetmine.mizuguchilab.org/documentation/list-of-data-sources" target="_blank">here</a> for other details.</p></dd>
 		</dl>
 	</div>
 
