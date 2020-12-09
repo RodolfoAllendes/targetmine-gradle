@@ -60,6 +60,13 @@
           <fmt:message key="menu.bag"/>
         </a>
       </li>
+      <%-- My EXTRA TAB Test --%>
+      <li id="otherWidgets" <c:if test="${tab == 'otherWidgets'}">class="activelink"</c:if>>
+        <a href="/${WEB_PROPERTIES['webapp.path']}/otherWidgets.do" >
+          <fmt:message key="menu.otherWidgets" />
+        </a>
+      </li>
+      <%--  --%>
       <li id="query" <c:if test="${tab == 'customQuery'}">class="activelink"</c:if>>
         <a href="/${WEB_PROPERTIES['webapp.path']}/customQuery.do">
           <fmt:message key="menu.customQuery"/>&nbsp;
