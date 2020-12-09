@@ -12,3 +12,11 @@
 <!-- Cytoscape plugin-->
 <definition name="cytoscapeNetworkDisplayer.tile" path="/model/cytoscapeNetworkDisplayer.jsp"
         controllerUrl="/initCytoscapeNetworkDisplayer.do"/>
+
+<!-- otherWidgets Menu Tab -->
+<definition name="otherWidgets.page" extends="layout.template">
+    <put name="body" value="otherWidgets.tile" />
+    <put name="pageName" value="otherWidgets" />
+</definition>
+
+<definition name="otherWidgets.tile" path="/otherWidgets.jsp"/>
