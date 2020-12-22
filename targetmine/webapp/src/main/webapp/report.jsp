@@ -281,51 +281,52 @@
 </script>
 <script type="text/javascript" src="js/inlinetemplate.js"></script>
 
-<div style="float:right;" class="grid_2 sidebar">
-  <div id="in-lists">
-    <tiles:insert name="reportInList.tile">
-      <tiles:put name="object" beanName="object"/>
-    </tiles:insert>
-  </div>
+  <div style="float:right;" class="grid_2 sidebar">
+    <div id="in-lists">
+      <tiles:insert name="reportInList.tile">
+        <tiles:put name="object" beanName="object"/>
+      </tiles:insert>
+    </div>
 
-  <c:set var="object_bk" value="${object}"/>
-  <c:set var="object" value="${reportObject.object}" scope="request"/>
-  <div id="external-links">
-    <tiles:insert name="otherMinesLink.tile" />
-    <tiles:insert name="attributeLinks.tile" >
+    <c:set var="object_bk" value="${object}"/>
+    <c:set var="object" value="${reportObject.object}" scope="request"/>
+    <div id="external-links">
+      <tiles:insert name="otherMinesLink.tile" />
+      <tiles:insert name="attributeLinks.tile" >
         <tiles:put name="reportObject" beanName="object" />
-  </tiles:insert>
-  </div>
-  <c:set var="object" value="${object_bk}"/>
+      </tiles:insert>
+    </div>
+    <c:set var="object" value="${object_bk}"/>
 
-  <%-- shown in a sidebar displayers --%>
-  <div id="displayers" class="table">
-    <tiles:insert page="/reportDisplayers.jsp">
-      <tiles:put name="placement" value="sidebar" />
-      <tiles:put name="reportObject" beanName="object" />
-    </tiles:insert>
-  </div>
-</div>
+    <%-- shown in a sidebar displayers --%>
+    <div id="displayers" class="table">
+      <tiles:insert page="/reportDisplayers.jsp">
+        <tiles:put name="placement" value="sidebar" />
+        <tiles:put name="reportObject" beanName="object" />
+      </tiles:insert>
+    </div>
+
+  </div> <!-- sidebar -->
+
 
 <div class="grid_10">
 
   <div id="summaryCategory" class="aspectBlock">
-   <tiles:insert page="/reportDisplayers.jsp">
+    <tiles:insert page="/reportDisplayers.jsp">
       <tiles:put name="placement" value="summary" />
-    <tiles:put name="reportObject" beanName="object" />
-     </tiles:insert>
+      <tiles:put name="reportObject" beanName="object" />
+    </tiles:insert>
 
-   <tiles:insert name="templateList.tile">
-    <tiles:put name="scope" value="global" />
-    <tiles:put name="placement" value="im:aspect:summary" />
-    <tiles:put name="reportObject" beanName="object" />
-  </tiles:insert>
+    <tiles:insert name="templateList.tile">
+      <tiles:put name="scope" value="global" />
+      <tiles:put name="placement" value="im:aspect:summary" />
+      <tiles:put name="reportObject" beanName="object" />
+    </tiles:insert>
 
     <tiles:insert page="/reportRefsCols.jsp">
       <tiles:put name="object" beanName="object" />
       <tiles:put name="placement" value="im:summary" />
     </tiles:insert>
-
   </div>
 
   <c:forEach items="${categories}" var="aspect" varStatus="status">
@@ -338,7 +339,7 @@
         <tiles:put name="aspectId" value="${templateIdPrefix}${status.index}" />
         <tiles:put name="opened" value="${status.index == 0}" />
       </tiles:insert>
-  </div>
+    </div>
   </c:forEach>
 
   <div id="OtherCategory" class="aspectBlock">
@@ -358,7 +359,9 @@
       <tiles:put name="placement" value="im:aspect:Miscellaneous" />
     </tiles:insert>
   </div>
-</div>
+
+</div> <!-- grid_10 -->
+
 </div>
 </div>
 

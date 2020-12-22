@@ -19,4 +19,20 @@
     <put name="pageName" value="otherWidgets" />
 </definition>
 
-<definition name="otherWidgets.tile" path="/otherWidgets.jsp"/>
+<definition
+  name="otherWidgets.tile"
+  path="/otherWidgets.jsp"
+  controllerUrl="initOtherWidgets.do"
+/>
+
+<!-- <definition name="reportPage.tile" path="/report.jsp" controllerUrl="/initReport.do"/> -->
+<definition name="bagDetails2.page" extends="layout.template">
+  <put name="body" value="bagDetails2.tile" />
+  <put name="pageName" value="bagDetails2" />
+</definition>
+
+<definition
+  name="bagDetails2.tile"
+  path="/bagDetails2.jsp"
+/>
+<!-- controllerUrl="initBagDetails2.do" -->

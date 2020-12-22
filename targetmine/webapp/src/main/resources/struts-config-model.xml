@@ -35,3 +35,5 @@
   path="/otherWidgets"
   forward="otherWidgets.page"
 />
+
+<action path="/bagDetails2" forward="bagDetails.page"></action>
