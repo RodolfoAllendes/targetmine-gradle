@@ -92,10 +92,10 @@
   <im:dateDisplay type="short" date="${webSearchable.dateCreated}"/>
 </c:if></em> -->
 
-&nsbp;
-<html:link styleClass="listTitle" action="/bagDetails2?scope=${scope}&amp;bagName=${nameForURL}">
+<br />
+<html:link styleClass="listTitle" action="/compositeNetwork?scope=${scope}&amp;bagName=${nameForURL}">
  <%--  <img src="images/bag_ico.png" width="13" height="13" alt="View Bag"> --%>
-  <c:out value="Second link: ${webSearchable.name}"/>
+  <c:out value="Composite Network"/>
 </html:link>
 
 <c:if test="${showDescriptions}">

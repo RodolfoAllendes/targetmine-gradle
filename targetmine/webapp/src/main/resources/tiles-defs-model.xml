@@ -26,13 +26,14 @@
 />
 
 <!-- <definition name="reportPage.tile" path="/report.jsp" controllerUrl="/initReport.do"/> -->
-<definition name="bagDetails2.page" extends="layout.template">
-  <put name="body" value="bagDetails2.tile" />
-  <put name="pageName" value="bagDetails2" />
+<definition name="compositeNetwork.page" extends="layout.template">
+  <put name="body" value="compositeNetwork.tile" />
+  <put name="pageName" value="compositeNetwork" />
 </definition>
 
 <definition
-  name="bagDetails2.tile"
-  path="/bagDetails2.jsp"
-/>
-<!-- controllerUrl="initBagDetails2.do" -->
+  name="compositeNetwork.tile"
+  path="/compositeNetwork.jsp"
+  controllerUrl="/initCompositeNetwork.do"
+>
+</definition>

@@ -36,4 +36,6 @@
   forward="otherWidgets.page"
 />
 
-<action path="/bagDetails2" forward="bagDetails.page"></action>
+<!-- Second list of list details -->
+<action path="/compositeNetwork" forward="compositeNetwork.page"></action>
+<action path="/initCompositeNetwork" type="org.intermine.web.struts.CompositeNetworkController"></action>
