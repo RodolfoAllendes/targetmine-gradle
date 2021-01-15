@@ -1088,12 +1088,15 @@
   </reportdisplayers>
 
   <otherReportDisplayers>
+
     <otherReportDisplayer
       javaClass="org.intermine.bio.web.displayer.GeneExpressionGraphDisplayer"
       jspName="model/geneExpressionGraphDisplayer.jsp"
       replacesFields=""
       placement="summary"
-      types="Gene" />
+      types="Gene"
+    />
+
   </otherReportDisplayers>
 
 

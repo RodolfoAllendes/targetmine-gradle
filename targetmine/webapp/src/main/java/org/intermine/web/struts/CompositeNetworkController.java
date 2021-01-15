@@ -95,8 +95,6 @@ public class CompositeNetworkController extends TilesAction{
       ActionForm form, HttpServletRequest request, HttpServletResponse response)
       throws Exception {
 
-    LOG.error("TEST ERROR MESSAGE COMPOSITE NETWORK - RODOLFO");
-
     HttpSession session = request.getSession();
     final InterMineAPI im = SessionMethods.getInterMineAPI(session);
     Profile profile = SessionMethods.getProfile(session);
@@ -109,15 +107,15 @@ public class CompositeNetworkController extends TilesAction{
       bagName = request.getParameter("name");
     }
 
-        String scope = request.getParameter("scope");
-        if (scope == null) {
-          scope = Scope.ALL;
-        }
+    String scope = request.getParameter("scope");
+    if (scope == null) {
+      scope = Scope.ALL;
+      }
 
-     // retrieve the bag either from a specific user or as a global bag depending
-     // on the scope
-     // If the bag is invalid or inexistant, pass the according message and
-     // finish execution
+    // retrieve the bag either from a specific user or as a global bag depending
+    // on the scope
+    // If the bag is invalid or inexistant, pass the according message and
+    // finish execution
     InterMineBag imBag = null;
     Boolean myBag = Boolean.FALSE;
     if (scope.equals(Scope.USER) || scope.equals(Scope.ALL)) {
@@ -131,7 +129,6 @@ public class CompositeNetworkController extends TilesAction{
         return null;
       }
     }
-
     if (scope.equals(Scope.GLOBAL) || scope.equals(Scope.ALL)) {
       if (bagManager.getGlobalBag(bagName) != null) {
         imBag = bagManager.getGlobalBag(bagName);
@@ -139,7 +136,6 @@ public class CompositeNetworkController extends TilesAction{
       imBag = bagManager.getSharedBags(profile).get(bagName);
       }
     }
-
     if (imBag == null) {
       ActionMessages actionMessages = getErrors(request);
       actionMessages.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("errors.bag.missing", bagName));
@@ -148,57 +144,28 @@ public class CompositeNetworkController extends TilesAction{
       return null;
     }
 
-
-    // Get the contents of the bag
-    List bagContentsIds = imBag.getContents();
-    request.setAttribute("bagContentsIds", bagContentsIds);
-
     // Check if the list hasnt been modified by the owner before we load it
     final String currentState = "CURRENT";
     if (!currentState.equalsIgnoreCase(imBag.getState())) {
-        // list is not current
-        final String msg = "List '" + bagName + "' is currently unavailable. It requires "
-                + "upgrading by the list owner.";
-        request.setAttribute("errorMessage", msg);
-        request.setAttribute("invalid", true);
-        return null;
+      // list is not current
+      final String msg = "List '" + bagName + "' is currently unavailable. It requires upgrading by the list owner.";
+      request.setAttribute("errorMessage", msg);
+      request.setAttribute("invalid", true);
+      return null;
     }
 
+
+
+    // Get the contents of the bag
+    List<Integer> bagContentsIds = imBag.getContentsAsIds();
+    request.setAttribute("bagContentsIds", bagContentsIds);
     // Configuration required to perform queries on the DB
     WebConfig webConfig = SessionMethods.getWebConfig(request);
     Model model = os.getModel();
     Map<String, Type> types = webConfig.getTypes();
-
-    // PathQuery pathQuery = PathQueryResultHelper.makePathQueryForBag(imBag, webConfig, model);
-    PathQuery pathQuery = new PathQuery(model);
+    
+    PathQuery pathQuery = PathQueryResultHelper.makePathQueryForBag(imBag, webConfig, model);
     SessionMethods.setQuery(session, pathQuery);
-
-    pathQuery.addViews("Gene.primaryIdentifier", "Gene.symbol", "Gene.name", "Gene.id");
-    pathQuery.addConstraint(Constraints.eq("Gene.ncbiGeneId", "351,10001"));
-
-    Query q = new Query();
-	  QueryClass qcGene = new QueryClass(Gene.class);
-	  QueryField qfSymbol = new QueryField(qcGene, "symbol");
-    q.addFrom(qcGene);
-    q.addToSelect(qfSymbol);
-    // ConstraintSet cs = new ConstraintSet(ConstraintOp.AND);
-	   // organism in our list
-	  //cs.addConstraint(new BagConstraint(qfOrganismTaxonId, ConstraintOp.IN, taxonIds));
-	// protein.organism = organism
-	//   QueryObjectReference qor = new QueryObjectReference(qcProtein, "organism");
-	// cs.addConstraint(new ContainsConstraint(qor, ConstraintOp.CONTAINS, qcOrganism));
-	// q.setConstraint(cs);
-	 Results results = os.execute(q);
-   // Set<String> proteinIds = new HashSet<String>();
-   // Iterator<Object> iterator = results.iterator();
-		// while (iterator.hasNext()) {
-		// 	ResultsRow<String> rr = (ResultsRow<String>) iterator.next();
-		// 	proteinIds.add(rr.get(0));
-   //  }
-    LOG.error("Results: "+results);
-  
-    request.setAttribute("results", results);
-
     // PagedResults creates a table-structured data representation of the elements
     // found in the bag. We use it to later display these elements in the
     // at the beginning of the Composite Network site
@@ -207,6 +174,33 @@ public class CompositeNetworkController extends TilesAction{
     if (pagedResults == null || pagedResults.getExactSize() != bagSize) {
       pagedResults = SessionMethods.doQueryGetPagedTable(request, imBag);
     }
+    //
+    // pathQuery.addViews("Gene.primaryIdentifier", "Gene.symbol", "Gene.name", "Gene.id");
+    // pathQuery.addConstraint(Constraints.eq("Gene.ncbiGeneId", "351,10001"));
+
+  //   Query q = new Query();
+	//   QueryClass qcGene = new QueryClass(Gene.class);
+	//   QueryField qfSymbol = new QueryField(qcGene, "symbol");
+  //   q.addFrom(qcGene);
+  //   q.addToSelect(qfSymbol);
+  //   // ConstraintSet cs = new ConstraintSet(ConstraintOp.AND);
+	//    // organism in our list
+	//   //cs.addConstraint(new BagConstraint(qfOrganismTaxonId, ConstraintOp.IN, taxonIds));
+	// // protein.organism = organism
+	// //   QueryObjectReference qor = new QueryObjectReference(qcProtein, "organism");
+	// // cs.addConstraint(new ContainsConstraint(qor, ConstraintOp.CONTAINS, qcOrganism));
+	// // q.setConstraint(cs);
+	//   Results results = os.execute(q);
+  //   Set<String> proteinIds = new HashSet<String>();
+  //   Iterator<Object> iterator = results.iterator();
+	// 	while (iterator.hasNext()) {
+	// 		ResultsRow<String> rr = (ResultsRow<String>) iterator.next();
+	// 		proteinIds.add(rr.get(0));
+  //     LOG.error("GeneID: "+rr.get(0));
+  //   }
+  //   LOG.error("Results (all IDs): "+proteinIds);
+  //
+  //   request.setAttribute("results", proteinIds);
 
     // // tracks the list execution only if the list hasn't
     // // just been created
@@ -288,22 +282,19 @@ public class CompositeNetworkController extends TilesAction{
         request.setAttribute("pagedResults", pagedResults);
 
       // Trying to reuse the query structured used by @chen in Vermillion
-      // ServiceFactory factory = new ServiceFactory("https://targetmine.mizuguchilab.org/targetmine/service");
-      String[] ids = {"9779","7287","7288","7289","9253","8650","222484","7275"};
-      String taxonId =  "H. sapiens";
-      PathQuery secondQuery = new PathQuery(model);
-  		secondQuery.addViews("Gene.primaryIdentifier", "Gene.symbol", "Gene.name", "Gene.id");
-  		secondQuery.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
-  		secondQuery.addConstraint(Constraints.lookup("Gene", StringUtils.join(ids, ","), ""), "A");
-  		secondQuery.addConstraint(Constraints.eq("Gene.organism.taxonId", taxonId), "B");
-  		secondQuery.setConstraintLogic("A and B");
+      // // ServiceFactory factory = new ServiceFactory("https://targetmine.mizuguchilab.org/targetmine/service");
+      // String[] ids = {"9779","7287","7288","7289","9253","8650","222484","7275"};
+      // String taxonId =  "H. sapiens";
+      // PathQuery secondQuery = new PathQuery(model);
+  		// secondQuery.addViews("Gene.primaryIdentifier", "Gene.symbol", "Gene.name", "Gene.id");
+  		// secondQuery.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
+  		// secondQuery.addConstraint(Constraints.lookup("Gene", StringUtils.join(ids, ","), ""), "A");
+  		// secondQuery.addConstraint(Constraints.eq("Gene.organism.taxonId", taxonId), "B");
+  		// secondQuery.setConstraintLogic("A and B");
 
       // SessionMethods.setQuery(session, secondQuery);
       // PagedTable secondResults = SessionMethods.getResultsTable(session, "secondQuery." + imBag.getName());
 
-      // QueryService service = factory.getQueryService();
-    	// List<List<String>> queryResults = service.getAllResults(query);
-      // request.setAttribute("secondResults", secondResults);
 
         // // request.setAttribute("highlightId", highlightIdStr);
         // // // disable using pathquery saved in session in following jsp page

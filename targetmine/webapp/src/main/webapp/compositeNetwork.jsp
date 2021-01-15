@@ -29,23 +29,15 @@
   numberOfTableRowsToShow = (numberOfTableRowsToShow == '') ? 30 : parseInt(numberOfTableRowsToShow);
 </script>
 <script type="text/javascript" src="<html:rewrite page='/js/report.js'/>"></script>
-
 <script type="text/javascript" src="<html:rewrite page='/js/inlinetemplate.js'/>"></script>
 
-<script type="text/javascript">
-  console.log('Bag: ${bag}');
-  console.log('bagContentsIds: ${bagContentsIds}');
-  console.log('Results: ${results}');
-  console.log('pagedResults: ${pagedResults}');
-
-  console.log('queryResults', ${secondResults});
-</script>
+<div id="jspVariables"
+  data-bag='${bag}'
+  data-bagContentsIds="${bagContentsIds}"
+  >
+</div>
 
 <div class="body">
-
-  <!-- <c:forEach items="${results}" var="entry">
-    Key = ${entry.key}, value = ${entry.value}<br>
-  </c:forEach> -->
 
   <c:choose>
     <c:when test="${!empty bag}">
@@ -67,7 +59,7 @@
           <td valign="top" class="tableleftcol">
             <div class="results collection-table nomargin">
               <style type="text/css">
-                .bag-detail-table { max-width: 1000px; }
+              .bag-detail-table { max-width: 1000px; }
               </style>
 
               <%-- Table displaying bag elements --%>
@@ -84,6 +76,29 @@
         </tr>
 
       </table>
+
+      <script type="text/javascript">
+        // console.log('Bag: ${bag}');
+        // console.log('bag.name: ${bag.name}');
+        // console.log('bagContentsIds: ${bagContentsIds}');
+        // console.log('Results: ${results}');
+        // console.log('pagedResults: ${pagedResults}');
+        // console.log('queryResults', ${secondResults});
+      </script>
+
+
+  <!-- <c:forEach items="${results}" var="entry">
+    Key = ${entry.key}, value = ${entry.value}<br>
+  </c:forEach> -->
+
+
+      <%-- <div class="report displayers">
+        <tiles:insert page="reportDisplayers.jsp">
+          <tiles:put name="placement" value="summary" />
+          <tiles:put name="reportObject" beanName="${bag}" />
+        </tiles:insert>
+      </div> --%>
+
 
     </c:when>
     <c:otherwise>
