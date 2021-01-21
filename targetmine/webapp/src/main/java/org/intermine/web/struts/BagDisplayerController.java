@@ -18,14 +18,16 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.intermine.web.displayer.ReportDisplayer;
-import org.intermine.web.logic.results.ReportObject;
+import org.intermine.api.profile.InterMineBag;
 
 /**
- * Execute a ReportDisplayer placed on the context.
- * @author Richard Smith
+ * Execute a BagDisplayer placed on the context.
+ * @author Rodolfo Allendes
+ *
+ * based on ReportDisplayerController, by Richard Smith
  *
  */
-public class ReportDisplayerController extends TilesAction
+public class BagDisplayerController extends TilesAction
 {
     /**
      * {@inheritDoc}
@@ -38,7 +40,7 @@ public class ReportDisplayerController extends TilesAction
                                  HttpServletResponse response) {
 
         ReportDisplayer displayer = (ReportDisplayer) context.getAttribute("displayer");
-        ReportObject reportObject = (ReportObject) context.getAttribute("reportObject");
+        InterMineBag reportBag = (InterMineBag) context.getAttribute("reportBag");
 
         displayer.execute(request, reportObject);
 
