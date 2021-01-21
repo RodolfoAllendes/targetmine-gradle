@@ -28,7 +28,7 @@ if(new java.io.File(application.getRealPath("/js")+"/"+pageName+".js").exists())
 <!-- page: ${pageName} -->
 
 <c:if test="${pageName != 'begin'}">
-  <c:if test="${pageName == 'results' || pageName == 'bagDetails' || pageName == 'report' || pageName == 'compositeNetwork'}">
+  <c:if test="${pageName == 'results' || pageName == 'bagDetails' || pageName == 'report'}">
     <im:headResources section="results"/>
   </c:if>
 
@@ -42,6 +42,12 @@ if(new java.io.File(application.getRealPath("/js")+"/"+pageName+".js").exists())
 
   <c:if test="${pageName == 'query' || pageName == 'exportOptions'}">
     <im:headResources section="query|export"/>
+  </c:if>
+
+  <c:if test="${pageName == 'compositeNetwork'}">
+    <im:headResources section="results" />
+    <im:headResources section="query" />
+    <im:headResources section="bagDetails" />
   </c:if>
 
   <script type="text/javascript">

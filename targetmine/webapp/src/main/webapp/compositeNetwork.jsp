@@ -1,3 +1,4 @@
+<!doctype html>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -8,7 +9,8 @@
 <%@ taglib uri="http://jakarta.apache.org/taglibs/string-1.1" prefix="str" %>
 <%@ taglib uri="/WEB-INF/functions.tld" prefix="imf" %>
 
-<!-- bagDetails2.jsp by Rodolfo-->
+<!-- compositeNetwork.jsp by Rodolfo-->
+<!-- based on bagDetails.jsp -->
 <html:xhtml/>
 
 <link rel="stylesheet" href="css/resultstables.css" type="text/css" />
@@ -31,17 +33,16 @@
 <script type="text/javascript" src="<html:rewrite page='/js/report.js'/>"></script>
 <script type="text/javascript" src="<html:rewrite page='/js/inlinetemplate.js'/>"></script>
 
-<div id="jspVariables"
-  data-bag='${bag}'
-  data-bagContentsIds="${bagContentsIds}"
-  >
-</div>
+<script type="text/javascript">
+  console.log("Data retrieved from CompositeNetworkController");
+  console.log('Bag: ${bag}');
+  console.log('Bag ID: ${bagID}');
+  console.log('Displayers List: ${displayers}');
+</script>
 
 <div class="body">
-
   <c:choose>
     <c:when test="${!empty bag}">
-
       <!-- Title Header -->
       <div class="heading results">
         <h1>
@@ -50,11 +51,13 @@
         </h1>
       </div>
 
+      <div id="tool_bar_item_display" style="display:none;width:100px" class="tool_bar_item">
+        <html:link anchor="widgets" action="compositeNetwork?bagName=${bag.name}">Related widgets</html:link>
+        <a href="javascript:hideMenu('tool_bar_item_display')"><fmt:message key="confirm.cancel"/></a>
+      </div>
+
       <!-- Table that list the components of the Bag -->
       <table class="results">
-        <tr>
-        </tr>
-
         <tr>
           <td valign="top" class="tableleftcol">
             <div class="results collection-table nomargin">
@@ -77,19 +80,15 @@
 
       </table>
 
-      <script type="text/javascript">
-        // console.log('Bag: ${bag}');
-        // console.log('bag.name: ${bag.name}');
-        // console.log('bagContentsIds: ${bagContentsIds}');
-        // console.log('Results: ${results}');
-        // console.log('pagedResults: ${pagedResults}');
-        // console.log('queryResults', ${secondResults});
-      </script>
+      <c:forEach items="${displayers}" var="displayer">
+        <a name="${displayer.displayerName}" class="anchor"></a>
+        <tiles:insert name="bagDisplayer.tile">
+          <tiles:put name="displayer" beanName="displayer" />
+          <tiles:put name="reportBag" beanName='${bag}' />
+        </tiles:insert>
 
+     </c:forEach>
 
-  <!-- <c:forEach items="${results}" var="entry">
-    Key = ${entry.key}, value = ${entry.value}<br>
-  </c:forEach> -->
 
 
       <%-- <div class="report displayers">
@@ -99,10 +98,8 @@
         </tiles:insert>
       </div> --%>
 
-
     </c:when>
     <c:otherwise>
-
       <div class="bigmessage">
         <br />
         <b>Error</b>${errorMessage}
@@ -112,4 +109,4 @@
     </c:otherwise>
   </c:choose>
 </div>
-<!-- /bagDetails2.jsp by Rodolfo -->
+<!-- /compositeNetwork.jsp by Rodolfo -->

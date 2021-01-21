@@ -37,3 +37,9 @@
   controllerUrl="/initCompositeNetwork.do"
 >
 </definition>
+
+<definition
+  name="bagDisplayer.tile"
+  path="bagDisplayer.jsp"
+  controllerUrl="/initBagDisplayer.do"
+/>

@@ -52,6 +52,7 @@ import org.intermine.pathquery.PathQuery;
 import org.intermine.web.logic.config.FieldConfig;
 import org.intermine.web.logic.config.Type;
 import org.intermine.web.logic.config.WebConfig;
+import org.intermine.web.logic.config.Displayer;
 import org.intermine.web.logic.pathqueryresult.PathQueryResultHelper;
 import org.intermine.web.logic.results.PagedTable;
 import org.intermine.web.logic.session.SessionMethods;
@@ -62,6 +63,8 @@ import org.apache.commons.lang.StringUtils;
 import org.intermine.pathquery.Constraints;
 import org.intermine.pathquery.OrderDirection;
 
+import org.apache.commons.collections.set.ListOrderedSet;
+
 import org.intermine.model.bio.Gene;
 import org.intermine.objectstore.query.Query;
 import org.intermine.objectstore.query.QueryClass;
@@ -69,6 +72,9 @@ import org.intermine.objectstore.query.QueryField;
 import org.intermine.objectstore.query.ConstraintSet;
 import org.intermine.objectstore.query.QueryObjectReference;
 import org.intermine.objectstore.query.Results;
+
+import org.intermine.web.displayer.DisplayerManager;
+import org.intermine.web.displayer.ReportDisplayer;
 
 // import org.intermine.webservice.client.core.ServiceFactory;
 // import org.intermine.webservice.client.services.QueryService;
@@ -154,157 +160,51 @@ public class CompositeNetworkController extends TilesAction{
       return null;
     }
 
-
-
-    // Get the contents of the bag
-    List<Integer> bagContentsIds = imBag.getContentsAsIds();
-    request.setAttribute("bagContentsIds", bagContentsIds);
     // Configuration required to perform queries on the DB
-    WebConfig webConfig = SessionMethods.getWebConfig(request);
-    Model model = os.getModel();
-    Map<String, Type> types = webConfig.getTypes();
-    
-    PathQuery pathQuery = PathQueryResultHelper.makePathQueryForBag(imBag, webConfig, model);
-    SessionMethods.setQuery(session, pathQuery);
     // PagedResults creates a table-structured data representation of the elements
     // found in the bag. We use it to later display these elements in the
     // at the beginning of the Composite Network site
     PagedTable pagedResults = SessionMethods.getResultsTable(session, "bag." + imBag.getName());
+    WebConfig webConfig = SessionMethods.getWebConfig(request);
+    Model model = os.getModel();
+    PathQuery pathQuery = PathQueryResultHelper.makePathQueryForBag(imBag, webConfig, model);
+    SessionMethods.setQuery(session, pathQuery);
     int bagSize = imBag.getSize();
     if (pagedResults == null || pagedResults.getExactSize() != bagSize) {
       pagedResults = SessionMethods.doQueryGetPagedTable(request, imBag);
     }
-    //
-    // pathQuery.addViews("Gene.primaryIdentifier", "Gene.symbol", "Gene.name", "Gene.id");
-    // pathQuery.addConstraint(Constraints.eq("Gene.ncbiGeneId", "351,10001"));
 
-  //   Query q = new Query();
-	//   QueryClass qcGene = new QueryClass(Gene.class);
-	//   QueryField qfSymbol = new QueryField(qcGene, "symbol");
-  //   q.addFrom(qcGene);
-  //   q.addToSelect(qfSymbol);
-  //   // ConstraintSet cs = new ConstraintSet(ConstraintOp.AND);
-	//    // organism in our list
-	//   //cs.addConstraint(new BagConstraint(qfOrganismTaxonId, ConstraintOp.IN, taxonIds));
-	// // protein.organism = organism
-	// //   QueryObjectReference qor = new QueryObjectReference(qcProtein, "organism");
-	// // cs.addConstraint(new ContainsConstraint(qor, ConstraintOp.CONTAINS, qcOrganism));
-	// // q.setConstraint(cs);
-	//   Results results = os.execute(q);
-  //   Set<String> proteinIds = new HashSet<String>();
-  //   Iterator<Object> iterator = results.iterator();
-	// 	while (iterator.hasNext()) {
-	// 		ResultsRow<String> rr = (ResultsRow<String>) iterator.next();
-	// 		proteinIds.add(rr.get(0));
-  //     LOG.error("GeneID: "+rr.get(0));
-  //   }
-  //   LOG.error("Results (all IDs): "+proteinIds);
-  //
-  //   request.setAttribute("results", proteinIds);
-
-    // // tracks the list execution only if the list hasn't
-    // // just been created
-    // if (request.getParameter("trackExecution") == null
-    //     || "true".equals(request.getParameter("trackExecution"))) {
-    //     im.getTrackerDelegate().trackListExecution(imBag.getType(),
-    //             bagSize, profile, session.getId());
-    // }
-    //
+    // Retrieve the different displayers associated to the CompositeNetwork
+    // placement of the current bag
+    DisplayerManager displayerManager = DisplayerManager.getInstance(webConfig, im);
+    String bagType = model.getClassDescriptorByName(imBag.getType()).getSimpleName();
+    Map<String, List<ReportDisplayer>> allDisplayers = displayerManager.getReportDisplayersForType(bagType);
+    List<ReportDisplayer> displayers = null;
+    // For the given type, retrieve only the displayers placed at the CompositeNetwork aspect
+    if( allDisplayers != null )
+      displayers = allDisplayers.get("CompositeNetwork");
+    request.setAttribute("displayers", displayers);
 
 
     // Set the size
     String pageStr = request.getParameter("page");
     int page = -1;
-
-        // String highlightIdStr = request.getParameter("highlightId");
-        // Integer highlightId = null;
-        // if (highlightIdStr != null) {
-        //     highlightId = new Integer(Integer.parseInt(highlightIdStr));
-        // }
-        // boolean gotoHighlighted = false;
-        // String gotoHighlightedStr = request.getParameter("gotoHighlighted");
-        // if (gotoHighlightedStr != null
-        //     && ("t".equalsIgnoreCase(gotoHighlightedStr)
-        //         || "true".equalsIgnoreCase(gotoHighlightedStr))) {
-        //     gotoHighlighted = true;
-        // }
-        // if (highlightId != null && gotoHighlighted) {
-        //     // calculate the page
-        //     WebTable webTable = pagedResults.getAllRows();
-        //
-        //     for (int i = 0; i < webTable.size(); i++) {
-        //         MultiRow<ResultsRow<MultiRowValue<ResultElement>>> row
-        //             = webTable.getResultElements(i);
-        //         for (ResultsRow<MultiRowValue<ResultElement>> resultsRow : row) {
-        //             for (MultiRowValue<ResultElement> mrv : resultsRow) {
-        //                 if (mrv instanceof MultiRowFirstValue) {
-        //                     ResultElement resultElement = mrv.getValue();
-        //                     if (resultElement != null) {
-        //                         Integer id = resultElement.getId();
-        //                         if (id.equals(highlightId)) {
-        //                             page = i / PAGE_SIZE;
-        //                             break;
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        //
-        // // which fields shall we show in preview?
-        // List<String> showInPreviewTable = new ArrayList<String>();
-        // for (Entry<String, FieldConfig> entry : type.getFieldConfigMap().entrySet()) {
-        //     if (entry.getValue().getShowInListAnalysisPreviewTable()) {
-        //         showInPreviewTable.add(type.getDisplayName() + "." + entry.getKey());
-        //     }
-        // }
-        // request.setAttribute("showInPreviewTable", showInPreviewTable);
-        //
-        // request.setAttribute("firstSelectedFields",
-        //                      pagedResults.getFirstSelectedFields(os, classKeys));
-
-        if (page == -1) {
-            // use the page from the URL
-            page = (pageStr == null ? 0 : Integer.parseInt(pageStr));
-        }
-
-        pagedResults.setPageAndPageSize(page, PAGE_SIZE);
-        // is this list public?
-        // Boolean isPublic = bagManager.isPublic(imBag);
-        // request.setAttribute("isBagPublic", isPublic);
-        //
-        // request.setAttribute("addparameter", request.getParameter("addparameter"));
-        // request.setAttribute("myBag", myBag);
-
-        request.setAttribute("bag", imBag);
-        request.setAttribute("bagSize", new Integer(imBag.size()));
-        request.setAttribute("pagedResults", pagedResults);
-
-      // Trying to reuse the query structured used by @chen in Vermillion
-      // // ServiceFactory factory = new ServiceFactory("https://targetmine.mizuguchilab.org/targetmine/service");
-      // String[] ids = {"9779","7287","7288","7289","9253","8650","222484","7275"};
-      // String taxonId =  "H. sapiens";
-      // PathQuery secondQuery = new PathQuery(model);
-  		// secondQuery.addViews("Gene.primaryIdentifier", "Gene.symbol", "Gene.name", "Gene.id");
-  		// secondQuery.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
-  		// secondQuery.addConstraint(Constraints.lookup("Gene", StringUtils.join(ids, ","), ""), "A");
-  		// secondQuery.addConstraint(Constraints.eq("Gene.organism.taxonId", taxonId), "B");
-  		// secondQuery.setConstraintLogic("A and B");
-
-      // SessionMethods.setQuery(session, secondQuery);
-      // PagedTable secondResults = SessionMethods.getResultsTable(session, "secondQuery." + imBag.getName());
-
-
-        // // request.setAttribute("highlightId", highlightIdStr);
-        // // // disable using pathquery saved in session in following jsp page
-        // // // because it caused displaying invalid column names
-        // // request.setAttribute("notUseQuery", Boolean.TRUE);
-        // //
-        // Get us token so we can show non-public widgets.
-        request.setAttribute("token", profile.getDayToken());
-        LOG.debug("API key: " + profile.getDayToken());
-
-        return null;
+    if (page == -1) {
+      // use the page from the URL
+      page = (pageStr == null ? 0 : Integer.parseInt(pageStr));
     }
+
+    pagedResults.setPageAndPageSize(page, PAGE_SIZE);
+
+    request.setAttribute("bag", imBag);
+    request.setAttribute("bagID", imBag.getOsb().getBagId());
+    request.setAttribute("bagSize", new Integer(imBag.size()));
+    request.setAttribute("pagedResults", pagedResults);
+
+    // Get us token so we can show non-public widgets.
+    request.setAttribute("token", profile.getDayToken());
+    LOG.debug("API key: " + profile.getDayToken());
+
+    return null;
+  }
 }

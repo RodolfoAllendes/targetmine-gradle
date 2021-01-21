@@ -5,7 +5,7 @@
     <icon-image>model/images/genomics.gif</icon-image>
     <large-image>model/images/genomics.gif</large-image>
     <intro-text>
-      The gene annotations in TargetMine are from NCBI Gene databases. 
+      The gene annotations in TargetMine are from NCBI Gene databases.
     </intro-text>
     <tile-name>model/genes.jsp</tile-name>
     <aspect-source name="NCBI Gene" url="https://www.ncbi.nlm.nih.gov/gene"/>
@@ -16,7 +16,7 @@
     <icon-image>model/images/homolog.gif</icon-image>
     <large-image>model/images/homolog.gif</large-image>
     <intro-text>
-      Homology. 
+      Homology.
     </intro-text>
     <tile-name>model/genes.jsp</tile-name>
   </aspect>
@@ -107,7 +107,7 @@
     <icon-image>model/images/domain.png</icon-image>
     <large-image>model/images/domain.png</large-image>
     <intro-text>
-      Prtoein domain annotations. 
+      Prtoein domain annotations.
     </intro-text>
     <tile-name>model/domain.jsp</tile-name>
     <aspect-source name="InterPro" url="https://www.ebi.ac.uk/interpro/"/>
@@ -150,5 +150,18 @@
     </intro-text>
     <tile-name>model/genes.jsp</tile-name>
   </aspect>
+
+  <!-- start: Added by Rodolfo Allendes -->
+  <aspect name="CompositeNetwork">
+    <subtitle>Multi-layer Network</subtitle>
+    <icon-image>model/images/genomics.gif</icon-image>
+    <large-image>model/images/genomics.gif</large-image>
+    <tile-name></tile-name>
+    <intro-text>
+      Integratation of different data layers for analysis and visualizatio purposes.
+    </intro-text>
+    <tile-name>model/genes.jsp</tile-name>
+  </aspect>
+  <!-- end: Added by Rodolfo Allendes -->
 
 </aspects>

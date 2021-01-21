@@ -924,8 +924,18 @@
     </fields>
   </class>
 -->
-
 <!-- End: Added by Ishikawa.Motokazu -->
+
+<!-- Start: Added by Rodolfo Allendes -->
+  <class className="org.intermine.model.bio.GeneGroup">
+    <fields>
+      <fieldconfig fieldExpr="identifier"/>
+      <fieldconfig fieldExpr="name"/>
+      <fieldconfig fieldExpr="genes"/>
+    </fields>
+  </class>
+
+<!-- End: Added by Rodolfo Allendes -->
 
 <!-- exporters -->
   <tableExportConfig id="sequence" className="org.intermine.bio.web.export.SequenceHttpExporter"/>
@@ -977,10 +987,12 @@
                      replacesFields="modifications"
                      placement="Proteins"
                      types="Protein"/>
+
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.GenericReportDisplayer"
                      jspName="model/modificationPspInfoDisplayer.jsp"
                      replacesFields=""
                      types="Modification"/>
+
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.GenericReportDisplayer"
                      jspName="model/relationExtraInfoDisplayer.jsp"
                      replacesFields=""
@@ -1078,12 +1090,19 @@
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.GeneExpressionGraphDisplayer"
                      jspName="model/geneExpressionGraphDisplayer.jsp"
                      replacesFields=""
+                     placement="summary"
                      types="Gene" />
 
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.PathwayGraphDisplayer"
                      jspName="model/pathwayGraphDisplayer.jsp"
                      replacesFields=""
                      types="Pathway" />
+
+    <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetworkGraphDisplayer"
+                     jspName="model/compositeNetworkGraphDisplayer.jsp"
+                     replacesFields=""
+                     placement="CompositeNetwork"
+                     types="Gene" />
 
   </reportdisplayers>
 

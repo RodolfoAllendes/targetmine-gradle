@@ -20,6 +20,11 @@
 
 <c:set var="type" value="bag"/>
 
+<script type="text/javascript">
+  console.log('hola wsBagLineRodo');
+  console.log('widgets', ${widgets});
+</script>
+
 <!-- wsBagLineRodo.jsp -->
 <div id="${wsListId}_${type}_item_line_${webSearchable.name}"
   <c:choose>
