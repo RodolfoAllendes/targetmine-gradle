@@ -38,6 +38,8 @@
   console.log('Bag: ${bag}');
   console.log('Bag ID: ${bagID}');
   console.log('Displayers List: ${displayers}');
+  console.log('values: ${values}');
+  console.log('keyFieldNames: ${keyValues}');
 </script>
 
 <div class="body">
@@ -82,21 +84,14 @@
 
       <c:forEach items="${displayers}" var="displayer">
         <a name="${displayer.displayerName}" class="anchor"></a>
+        <c:set var="reportBag" value="${bag}"/>
+
         <tiles:insert name="bagDisplayer.tile">
           <tiles:put name="displayer" beanName="displayer" />
-          <tiles:put name="reportBag" beanName='${bag}' />
+          <tiles:put name="reportBag" beanName="reportBag" />
         </tiles:insert>
 
      </c:forEach>
-
-
-
-      <%-- <div class="report displayers">
-        <tiles:insert page="reportDisplayers.jsp">
-          <tiles:put name="placement" value="summary" />
-          <tiles:put name="reportObject" beanName="${bag}" />
-        </tiles:insert>
-      </div> --%>
 
     </c:when>
     <c:otherwise>

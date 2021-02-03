@@ -18,7 +18,10 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.intermine.web.displayer.ReportDisplayer;
+import org.intermine.web.displayer.BagDisplayer;
 import org.intermine.api.profile.InterMineBag;
+
+import org.apache.log4j.Logger;
 
 /**
  * Execute a BagDisplayer placed on the context.
@@ -27,8 +30,9 @@ import org.intermine.api.profile.InterMineBag;
  * based on ReportDisplayerController, by Richard Smith
  *
  */
-public class BagDisplayerController extends TilesAction
-{
+public class BagDisplayerController extends TilesAction{
+
+    private static final Logger LOG = Logger.getLogger(BagDisplayerController.class);
     /**
      * {@inheritDoc}
      */
@@ -39,10 +43,10 @@ public class BagDisplayerController extends TilesAction
                                  HttpServletRequest request,
                                  HttpServletResponse response) {
 
-        ReportDisplayer displayer = (ReportDisplayer) context.getAttribute("displayer");
+        BagDisplayer displayer = (BagDisplayer) context.getAttribute("displayer");
         InterMineBag reportBag = (InterMineBag) context.getAttribute("reportBag");
-
-        displayer.execute(request, reportObject);
+        
+        displayer.execute(request, reportBag);
 
         return null;
     }

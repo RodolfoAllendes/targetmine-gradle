@@ -11,6 +11,8 @@
 <div class='targetmineGraphDisplayer'></div>
 
 ${hellow}
+<br />
+${ids}
 <%-- Visualization Definition --%>
 
 </div>

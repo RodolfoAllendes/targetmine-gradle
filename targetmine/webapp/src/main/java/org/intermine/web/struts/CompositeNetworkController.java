@@ -76,6 +76,8 @@ import org.intermine.objectstore.query.Results;
 import org.intermine.web.displayer.DisplayerManager;
 import org.intermine.web.displayer.ReportDisplayer;
 
+import org.intermine.api.profile.InterMineBag;
+
 // import org.intermine.webservice.client.core.ServiceFactory;
 // import org.intermine.webservice.client.services.QueryService;
 
@@ -200,6 +202,9 @@ public class CompositeNetworkController extends TilesAction{
     request.setAttribute("bagID", imBag.getOsb().getBagId());
     request.setAttribute("bagSize", new Integer(imBag.size()));
     request.setAttribute("pagedResults", pagedResults);
+
+    request.setAttribute("values", imBag.getContents());
+    request.setAttribute("keyValues", imBag.getKeyFieldNames());
 
     // Get us token so we can show non-public widgets.
     request.setAttribute("token", profile.getDayToken());
