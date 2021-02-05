@@ -4,15 +4,24 @@
 <%@ taglib tagdir="/WEB-INF/tags" prefix="im"%>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 
+<%! int width = 400; %>
+<%! int height = 400; %>
+
 <div class='collection-table'>
 <h3>Composite Network Graph</h3>
 
 <!-- Visualization Container -->
 <div class='targetmineGraphDisplayer'></div>
 
-${hellow}
-<br />
-${ids}
-<%-- Visualization Definition --%>
-
+<script type="text/javascript">
+  import(window.location.origin+'/targetmine/js/CompositeNetworkGraph.mjs')
+    .then((module) => {
+      window.compositeNetworkGraph = new module.CompositeNetworkGraph(
+        '${bagName}',
+        '${data}',
+        <%= width %>,
+        <%= height %>
+      );
+    });
+</script>
 </div>

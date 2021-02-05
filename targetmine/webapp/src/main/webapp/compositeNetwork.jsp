@@ -38,8 +38,8 @@
   console.log('Bag: ${bag}');
   console.log('Bag ID: ${bagID}');
   console.log('Displayers List: ${displayers}');
-  console.log('values: ${values}');
-  console.log('keyFieldNames: ${keyValues}');
+  // console.log('values: ${values}');
+  // console.log('keyFieldNames: ${keyValues}');
 </script>
 
 <div class="body">

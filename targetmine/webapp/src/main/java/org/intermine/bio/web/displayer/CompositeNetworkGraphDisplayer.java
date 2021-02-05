@@ -82,84 +82,19 @@ public class CompositeNetworkGraphDisplayer extends BagDisplayer{
   @Override
   public void display(HttpServletRequest request, InterMineBag reportBag){
 
-    if( reportBag ==  null ){
-      request.setAttribute("hellow", "compositeNetworkGraphDisplayer.java - Bag:null ");
-    }
-    else{
-      request.setAttribute("hellow", reportBag.getClass());
-    }
+    // Retrieve the information for the bagk from the
+    request.setAttribute("bagName", reportBag.getName());
     try{
-      InterMineBag imbag = (InterMineBag) reportBag;
-      logger.error("keyFields "+imbag.getKeyFieldNames());
-      List<BagValue> values = imbag.getContents();
+      // A list of data elements that we will forward to Javascript for the
+      // definition of the graph
+      ArrayList<String> data = new ArrayList<String>();
+      data.add("ncbiGeneId");
+      List<BagValue> values = reportBag.getContents();
       for (BagValue v: values ){
-        logger.error(v.getValue());
+        String ncbiGeneId = (String) v.getValue();
+        data.add(ncbiGeneId);
       }
-      // logger.error("contentsfromOSB "+imbag.getContentsFromOsb());
-      request.setAttribute("ids",values);
-    // +reportObject.toString());
-
-
-    // // A list of data elements that we will forward to Javascript for the
-    // // definition of the graph
-    // ArrayList<String> data = new ArrayList<String>();
-    // String header = "probeSetId\t"+
-    //   "category\t"+
-    //   "organ\t"+
-    //   "name\t"+
-    //   "call\t"+
-    //   "value";
-    // String row; // we will use this to add elements to the data array
-    // data.add(header);
-    //
-    // // logger.error("header\n"+header);
-    // // The data retrieved from the database
-    // // InterMineObject gene = (InterMineObject) reportObject.getObject();
-    //
-    // try{
-    //   // A gene has a collection of ProbeSet objects associated, we need to
-    //   // process each probe in order to display its values
-    //   Set<ProbeSet> probeSets = (Set<ProbeSet>) gene.getFieldValue("probeSets");
-    //   for( ProbeSet ps: probeSets ){
-    //
-    //     // Each probeSet has a collection of Expression objects associated, we
-    //     // process each individually
-    //     Set<Expression> expressions = (Set<Expression>) ps.getFieldValue("expressions");
-    //     for( Expression exp: expressions ){
-    //
-    //       String probeID = (String)ps.getFieldValue("probeSetId");
-    //       // For each expression value, we need to store the following information
-    //       // tissue (hbiTissue)
-    //       // |-- category (String)
-    //       // |-- organ (String)
-    //       // |-- name (String)
-    //       // call (String <enum>['P', 'A', 'M'])
-    //       // value (float)
-    //       Tissue tissue = (HbiTissue) exp.getFieldValue("tissue");
-    //       String category = (String) tissue.getFieldValue("category");
-    //       String organ = (String) tissue.getFieldValue("organ");
-    //       String name = (String) tissue.getFieldValue("name");
-    //       // the char '/' cant be part of css selectors, so we replace it for '-'
-    //       category = category.replaceAll("/","-");
-    //       organ = organ.replaceAll("/","-");
-    //       name = name.replaceAll("/","-");
-    //
-    //       String call = (String) exp.getFieldValue("call");
-    //       float value = (Float) exp.getFieldValue("value");
-    //
-    //       row = probeID+"\t";
-    //       row += (category+"\t");
-    //       row += (organ+"\t");
-    //       row += (name+"\t");
-    //       row += (call+"\t");
-    //       row += value;
-    //
-    //       data.add(row);
-    //     }
-    //
-    //   }
-    //   /* fill the resulting table with the data */
-    //   request.setAttribute("gene", (String) gene.getFieldValue("ncbiGeneId"));
+      request.setAttribute("data",data);
 
     } //try
     catch(Exception e){
