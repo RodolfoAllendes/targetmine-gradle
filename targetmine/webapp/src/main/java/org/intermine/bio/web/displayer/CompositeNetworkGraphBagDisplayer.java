@@ -6,23 +6,34 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 
 import org.apache.log4j.Logger;
 import org.intermine.api.InterMineAPI;
 import org.intermine.api.profile.InterMineBag;
 import org.intermine.model.InterMineObject;
-import org.intermine.model.bio.Gene;
-import org.intermine.model.bio.ProbeSet;
-import org.intermine.model.bio.Expression;
-import org.intermine.model.bio.HbiExpression;
-import org.intermine.model.bio.Tissue;
-import org.intermine.model.bio.HbiTissue;
+// import org.intermine.model.bio.Gene;
+// import org.intermine.model.bio.ProbeSet;
+// import org.intermine.model.bio.Expression;
+// import org.intermine.model.bio.HbiExpression;
+// import org.intermine.model.bio.Tissue;
+// import org.intermine.model.bio.HbiTissue;
 
 import org.intermine.web.displayer.BagDisplayer;
 import org.intermine.web.logic.config.ReportDisplayerConfig;
 import org.intermine.web.logic.results.ReportObject;
-
 import org.intermine.api.profile.BagValue;
+
+// import org.intermine.client.core.ServiceFactory;
+// import org.intermine.client.services.QueryService;
+// import org.intermine.metadata.Model;
+// import org.intermine.pathquery.Constraints;
+// import org.intermine.pathquery.OrderDirection;
+// import org.intermine.pathquery.PathQuery;
+// import org.intermine.web.logic.session.SessionMethods;
+// import org.intermine.objectstore.ObjectStore;
+
 
 /**
  * Class used for retrieval and handling of information used in the display
@@ -31,7 +42,7 @@ import org.intermine.api.profile.BagValue;
  * @author Rodolfo Allendes
  * @version 0.1
  */
-public class CompositeNetworkGraphDisplayer extends BagDisplayer{
+public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
   /* define a LOG to post messages to */
   protected static final Logger logger = Logger.getLogger(GeneExpressionGraphDisplayer.class);
 
@@ -39,7 +50,7 @@ public class CompositeNetworkGraphDisplayer extends BagDisplayer{
    * Constructor
    * Use super class to initialize required components
    */
-  public CompositeNetworkGraphDisplayer(ReportDisplayerConfig config, InterMineAPI im){
+  public CompositeNetworkGraphBagDisplayer(ReportDisplayerConfig config, InterMineAPI im){
     super(config,im);
   }
 
@@ -81,8 +92,40 @@ public class CompositeNetworkGraphDisplayer extends BagDisplayer{
   @SuppressWarnings("unchecked")
   @Override
   public void display(HttpServletRequest request, InterMineBag reportBag){
+    /** init required stuff */
+    // HttpSession session = request.getSession();
+    // final InterMineAPI im = SessionMethods.getInterMineAPI(session);
+    // ObjectStore os = im.getObjectStore();
+    // Model model = os.getModel();
+    //
+    // PathQuery query = new PathQuery(model);
+    //
+    // // Select the output columns:
+    // query.addViews("Gene.primaryIdentifier",
+    //         "Gene.symbol",
+    //         "Gene.name",
+    //         "Gene.organism.name");
+    //
+    // // Add orderby
+    // query.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
+    //
+    // // Filter the results with the following constraints:
+    // query.addConstraint(Constraints.lookup("Gene", "351", null));
+    //
+    // os.execute(query);
 
-    // Retrieve the information for the bagk from the
+    //
+    // QueryService service = factory.getQueryService();
+    // PrintStream out = System.out;
+    // String format = "%-22.22s | %-22.22s | %-22.22s | %-22.22s\n";
+    // out.printf(format, query.getView().toArray());
+    // Iterator<List<Object>> rows = service.getRowListIterator(query);
+    // while (rows.hasNext()) {
+    //     out.printf(format, rows.next().toArray());
+    // }
+    // out.printf("%d rows\n", service.getCount(query));
+
+    // Retrieve the information for the bag
     request.setAttribute("bagName", reportBag.getName());
     try{
       // A list of data elements that we will forward to Javascript for the

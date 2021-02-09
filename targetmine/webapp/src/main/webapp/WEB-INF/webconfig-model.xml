@@ -1098,8 +1098,8 @@
                      replacesFields=""
                      types="Pathway" />
 
-    <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetworkGraphDisplayer"
-                     jspName="model/compositeNetworkGraphDisplayer.jsp"
+    <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetworkGraphBagDisplayer"
+                     jspName="model/compositeNetworkGraphBagDisplayer.jsp"
                      replacesFields=""
                      placement="CompositeNetwork"
                      types="Gene" />

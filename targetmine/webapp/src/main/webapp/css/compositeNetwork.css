@@ -1,3 +1,10 @@
+/* Definitions for the Cytoscape container DIV */
+div.targetmineGraphCytoscape{
+  flex-grow: 1;
+  width: 100%;
+  height: inherit; /* auto; */
+}
+
 table.results{
   border-spacing: 0px; /* cellspacing */
   width: 100%;
