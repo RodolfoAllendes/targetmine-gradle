@@ -81,11 +81,13 @@ export class TargetMineGraph {
    * controls are grouped in tables, each of which has a Title and an optional
    * 'Add' button (that allows the user to add elements during execution).
    *
+   * @param {string} containerId The id of the container where DOM elements for
+   * the graph will be added.
    * @param {Object} columnElements The list of tables that will be added to the
    * right column of the container
    */
-  initDOM(columnElements){
-    let container = d3.select('.targetmineGraphDisplayer');
+  initDOM(columnElements=undefined, containerId=undefined ){
+    let container = ( containerId === undefined ) ? d3.select('.targetmineGraphDisplayer') : d3.select('#'+containerId);
     // Left Column of the Visualization (main display)
     container.append('svg')
       .attr('id', 'canvas_'+this._type)
@@ -123,6 +125,7 @@ export class TargetMineGraph {
       })
       .exit().remove()
     ;
+
   }
 
   /**

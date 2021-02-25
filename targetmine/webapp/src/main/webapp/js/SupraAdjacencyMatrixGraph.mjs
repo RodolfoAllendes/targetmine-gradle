@@ -1,39 +1,47 @@
 'use strict';
+
 import { TargetMineGraph } from "./TargetMineGraph.mjs";
 import { MultiLayerNetwork } from "./MultiLayerNetwork.mjs";
 
 /**
- * @class CompositeNetworkGraph
+ * @class SupraAdjacencyMatrixGraph
  * @classdesc
  * @author Rodolfo Allendes
  * @version 1.0
  */
 
-export class CompositeNetworkGraph extends TargetMineGraph{
+export class SupraAdjacencyMatrixGraph extends TargetMineGraph{
 
   /**
    * Constructor
    * @param {string} name The name of the network
    * @param {string} data The ArrayList string representation of the data retrieved
    * from the database
+   * @param {string} containerId
    * @param {int} width
    * @param {int} height
    */
-  constructor(name, data, width, height){
+  constructor(name, data, containerId, width, height){
     /* initialize super class attributes */
-    super('compositeNetwork', name, width, height);
+    super('supraAdjacencyMatrix', name, width, height);
+    super.initDOM([], containerId);
 
     /* define variables specific to the class */
     this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
-    this._cy = undefined;
     this._network = new MultiLayerNetwork();
 
-    this.initDOM();
 
-    let self = this;
     this.loadData(data).then( () => {
-      self._cy.add( self._network.getCytoscapeElements() );
-      self._cy.layout({name: 'grid'}).run();
+      console.log('data loaded');
+
+      this.initXLabels();
+      super.initXAxis();
+      super.plotXAxis(90);
+
+      this.initYAxis();
+      super.plotYAxis();
+
+      this.plot();
     });
   }
 
@@ -130,38 +138,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   }
 
   /**
-   * Initialize DOM elements
-   */
-  initDOM(){
-    /* init common DOM elements */
-    let container = d3.select('#compositeNetworkGraph-div');
-    let cydiv = container.append('div')
-      .attr('id', 'canvas_'+this._type)
-      .attr('class', 'targetmineGraphCytoscape')
-      .ready
-      ;
-
-    this._cy = cytoscape({
-      container: jQuery('.targetmineGraphCytoscape'),
-      style:[
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'shape': 'data(shape)',
-            'background-color': 'data(color)',
-            'border-color': 'data(borderColor)',
-            'border-width': '1px',
-            'display': 'element',
-          }
-        }
-      ],
-    });
-  }
-
-  /**
    * Add the nodes that result from the query to the network and the cytoscape
    */
   addNodesFromResults(rows, layer){
@@ -177,6 +153,81 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     rows.forEach( row => {
       this._network.addEdge(row[0]+'-'+row[1],row[0], row[1]);
     });
+  }
+
+  /**
+   *
+   */
+  initXLabels(){
+    this._xLabels = [];
+    let nodes = this._network.getNodes();
+    for( let node in nodes ){
+      this._xLabels.push(nodes[node].label);
+    }
+  }
+
+  /**
+   * As the graph plots a squared matrix, the Y-axis required is a copy of the
+   * alreay available x-Axis
+   */
+  initYAxis(){
+    let scale = d3.scaleBand()
+      .domain(this._xLabels)
+      .range( [this._height-this._margin.bottom, this._margin.top] )
+      .padding(0.05)
+    ;
+    /* create the corresponding axis */
+    this._yAxis = d3.axisLeft(scale);
+  }
+
+  /**
+   *
+   */
+  plot(){
+    let X = this._xAxis.scale();
+    let Y = this._yAxis.scale();
+
+    let points = [];
+    let nodes = this._network.getNodes();
+    let edges = this._network.getEdges();
+    let layers = this._network.getLayers();
+
+    for( let edge in edges ){
+
+      points.push({
+        x: X(nodes[edges[edge].source].label),
+        y: Y(nodes[edges[edge].target].label),
+        color: layers[nodes[edges[edge].target].layer].color,
+      });
+
+      points.push({
+        y: Y(nodes[edges[edge].source].label),
+        x: X(nodes[edges[edge].target].label),
+        color: layers[nodes[edges[edge].target].layer].color,
+      });
+    }
+
+    // console.log(points);
+
+    // d3 part for plotting the squares
+    let canvas = d3.select('svg#canvas_supraAdjacencyMatrix > g#graph');
+    canvas.selectAll('#points').remove();
+    canvas.append('g')
+      .attr('id', 'points')
+      .attr('transform', 'translate('+this._margin.left+',0)')
+    ;
+
+    let pts = d3.select('#points').selectAll('g')
+      .data(points)
+    ;
+    let point = pts.enter().append('rect')
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
+      .attr("rx", 4)
+      .attr("ry", 4)
+      .attr("width", 10)
+      .attr("height", 10)
+      .style("fill", d => d.color);
   }
 
 }

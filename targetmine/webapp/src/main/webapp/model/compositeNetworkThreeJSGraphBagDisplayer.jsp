@@ -6,19 +6,21 @@
 
 <%! int width = 400; %>
 <%! int height = 400; %>
+<%! String containerId = "threeJSNetworkGraph-div"; %>
 
 <div class='collection-table'>
-<h3>Composite Network Graph</h3>
+<h3>ThreeJS Network Graph</h3>
 
 <!-- Visualization Container -->
-<div id='compositeNetworkGraph-div' class='targetmineGraphDisplayer'></div>
+<div id= <%= containerId %> class='targetmineGraphDisplayer'></div>
 
 <script type="text/javascript">
-  import(window.location.origin+'/targetmine/js/CompositeNetworkGraph.mjs')
+  import(window.location.origin+'/targetmine/js/CompositeNetworkThreeJSGraph.mjs')
     .then((module) => {
-      window.compositeNetworkGraph = new module.CompositeNetworkGraph(
+      window.compositeNetworkThreeJSGraph = new module.CompositeNetworkThreeJSGraph(
         '${bagName}',
         '${data}',
+        '<%= containerId %>',
         <%= width %>,
         <%= height %>
       );

@@ -1,3 +1,20 @@
+/* Definitions for the Cytoscape container DIV */
+div.targetmineGraphCytoscape{
+  flex-grow: 1;
+  width: 100%;
+  height: inherit; /* auto; */
+}
+
+#supraAdjacencyMatrixGraph-div{
+  width: 1500px;
+  height: 1500px;
+}
+
+table.results{
+  border-spacing: 0px; /* cellspacing */
+  width: 100%;
+}
+
 /* Overall CSS for the entire Graph Area */
 div.targetmineGraphDisplayer{
   display: flex;

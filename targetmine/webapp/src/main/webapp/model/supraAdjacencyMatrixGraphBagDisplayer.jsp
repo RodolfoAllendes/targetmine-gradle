@@ -4,21 +4,24 @@
 <%@ taglib tagdir="/WEB-INF/tags" prefix="im"%>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 
-<%! int width = 400; %>
-<%! int height = 400; %>
+<%! int width = 1500; %>
+<%! int height = 1500; %>
+<%! String containerId = "supraAdjacencyMatrixGraph-div"; %>
 
 <div class='collection-table'>
-<h3>Composite Network Graph</h3>
+<h3>Supra-Adjacency Matrix Graph</h3>
 
 <!-- Visualization Container -->
-<div id='compositeNetworkGraph-div' class='targetmineGraphDisplayer'></div>
+<div id= <%= containerId %> class='targetmineGraphDisplayer'></div>
 
 <script type="text/javascript">
-  import(window.location.origin+'/targetmine/js/CompositeNetworkGraph.mjs')
+  console.log("containerid", '<%= containerId %>');
+  import(window.location.origin+'/targetmine/js/SupraAdjacencyMatrixGraph.mjs')
     .then((module) => {
-      window.compositeNetworkGraph = new module.CompositeNetworkGraph(
+      window.supraAdjacencyMatrixGraph = new module.SupraAdjacencyMatrixGraph(
         '${bagName}',
         '${data}',
+        '<%= containerId %>',
         <%= width %>,
         <%= height %>
       );

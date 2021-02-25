@@ -1,15 +1,16 @@
 'use strict';
+
 import { TargetMineGraph } from "./TargetMineGraph.mjs";
 import { MultiLayerNetwork } from "./MultiLayerNetwork.mjs";
 
 /**
- * @class CompositeNetworkGraph
+ * @class SupraAdjacencyMatrixGraph
  * @classdesc
  * @author Rodolfo Allendes
  * @version 1.0
  */
 
-export class CompositeNetworkGraph extends TargetMineGraph{
+export class SupraAdjacencyMatrixGraph extends TargetMineGraph{
 
   /**
    * Constructor
@@ -21,7 +22,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    */
   constructor(name, data, width, height){
     /* initialize super class attributes */
-    super('compositeNetwork', name, width, height);
+    super('supraAdjacencyMatrix', name, width, height);
 
     /* define variables specific to the class */
     this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
@@ -134,9 +135,9 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    */
   initDOM(){
     /* init common DOM elements */
-    let container = d3.select('#compositeNetworkGraph-div');
+    let container = d3.select('.targetmineGraphDisplayer');
     let cydiv = container.append('div')
-      .attr('id', 'canvas_'+this._type)
+      .attr('id', 'canvas_'+this.type)
       .attr('class', 'targetmineGraphCytoscape')
       .ready
       ;

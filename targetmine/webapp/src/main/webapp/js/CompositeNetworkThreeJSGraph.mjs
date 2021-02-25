@@ -3,13 +3,13 @@ import { TargetMineGraph } from "./TargetMineGraph.mjs";
 import { MultiLayerNetwork } from "./MultiLayerNetwork.mjs";
 
 /**
- * @class CompositeNetworkGraph
+ * @class CompositeNetworkThreeJSGraph
  * @classdesc
  * @author Rodolfo Allendes
  * @version 1.0
  */
 
-export class CompositeNetworkGraph extends TargetMineGraph{
+export class CompositeNetworkThreeJSGraph extends TargetMineGraph{
 
   /**
    * Constructor
@@ -19,22 +19,20 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    * @param {int} width
    * @param {int} height
    */
-  constructor(name, data, width, height){
+  constructor(name, ...args){
+    // data, containerId, width, height){
     /* initialize super class attributes */
-    super('compositeNetwork', name, width, height);
-
+    // super('threeJSNetwork', name, width, height);
+    super('threeJSNetwork', name, args[2], args[3]);
+    
     /* define variables specific to the class */
     this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
-    this._cy = undefined;
     this._network = new MultiLayerNetwork();
+
+    this._containerId = args[1];
 
     this.initDOM();
 
-    let self = this;
-    this.loadData(data).then( () => {
-      self._cy.add( self._network.getCytoscapeElements() );
-      self._cy.layout({name: 'grid'}).run();
-    });
   }
 
   /**
@@ -134,31 +132,47 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    */
   initDOM(){
     /* init common DOM elements */
-    let container = d3.select('#compositeNetworkGraph-div');
-    let cydiv = container.append('div')
-      .attr('id', 'canvas_'+this._type)
-      .attr('class', 'targetmineGraphCytoscape')
-      .ready
+    let container = d3.select('#'+this._containerId)
+      .append('canvas')
+        .attr('id', 'canvas_'+this._type)
+        .ready
       ;
 
-    this._cy = cytoscape({
-      container: jQuery('.targetmineGraphCytoscape'),
-      style:[
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'shape': 'data(shape)',
-            'background-color': 'data(color)',
-            'border-color': 'data(borderColor)',
-            'border-width': '1px',
-            'display': 'element',
-          }
-        }
-      ],
-    });
+    let canvas = document.querySelector('#canvas_'+this._type);
+    this._renderer = new THREE.WebGLRenderer({canvas});
+
+    const fov = 75;
+    const aspect = 2;  // the canvas default
+    const near = 0.1;
+    const far = 5;
+    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+
+    camera.position.z = 2;
+
+    const scene = new THREE.Scene();
+
+    const boxWidth = 1;
+const boxHeight = 1;
+const boxDepth = 1;
+const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+
+const material = new THREE.MeshBasicMaterial({color: 0x44aa88});
+const cube = new THREE.Mesh(geometry, material);
+
+scene.add(cube);
+this._renderer.render(scene, camera);
+
+// function render(time) {
+//   time *= 0.001;  // convert time to seconds
+ 
+//   cube.rotation.x = time;
+//   cube.rotation.y = time;
+ 
+//   this._renderer.render(scene, camera);
+ 
+//   requestAnimationFrame(render);
+// }
+// requestAnimationFrame(render);
   }
 
   /**

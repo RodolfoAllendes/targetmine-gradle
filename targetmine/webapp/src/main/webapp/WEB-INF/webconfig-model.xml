@@ -1098,11 +1098,25 @@
                      replacesFields=""
                      types="Pathway" />
 
+    
+    <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetworkThreeJSGraphBagDisplayer"
+                     jspName="model/compositeNetworkThreeJSGraphBagDisplayer.jsp"
+                     replacesFields=""
+                     placement="CompositeNetwork"
+                     types="Gene"
+    />
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetworkGraphBagDisplayer"
                      jspName="model/compositeNetworkGraphBagDisplayer.jsp"
                      replacesFields=""
                      placement="CompositeNetwork"
-                     types="Gene" />
+                     types="Gene"
+    />
+    <reportdisplayer javaClass="org.intermine.bio.web.displayer.SupraAdjacencyMatrixGraphBagDisplayer"
+                    jspName="model/supraAdjacencyMatrixGraphBagDisplayer.jsp"
+                    replacesFields=""
+                    placement="CompositeNetwork"
+                    types="Gene"
+    />
 
   </reportdisplayers>
 
