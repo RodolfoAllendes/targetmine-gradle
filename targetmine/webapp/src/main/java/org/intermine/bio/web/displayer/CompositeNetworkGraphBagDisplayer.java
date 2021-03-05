@@ -3,37 +3,20 @@ package org.intermine.bio.web.displayer;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+// import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+// import javax.servlet.http.HttpSession;
 
 
 import org.apache.log4j.Logger;
 import org.intermine.api.InterMineAPI;
-import org.intermine.api.profile.InterMineBag;
 import org.intermine.model.InterMineObject;
-// import org.intermine.model.bio.Gene;
-// import org.intermine.model.bio.ProbeSet;
-// import org.intermine.model.bio.Expression;
-// import org.intermine.model.bio.HbiExpression;
-// import org.intermine.model.bio.Tissue;
-// import org.intermine.model.bio.HbiTissue;
-
+import org.intermine.api.profile.InterMineBag;
 import org.intermine.web.displayer.BagDisplayer;
 import org.intermine.web.logic.config.ReportDisplayerConfig;
 import org.intermine.web.logic.results.ReportObject;
 import org.intermine.api.profile.BagValue;
-
-// import org.intermine.client.core.ServiceFactory;
-// import org.intermine.client.services.QueryService;
-// import org.intermine.metadata.Model;
-// import org.intermine.pathquery.Constraints;
-// import org.intermine.pathquery.OrderDirection;
-// import org.intermine.pathquery.PathQuery;
-// import org.intermine.web.logic.session.SessionMethods;
-// import org.intermine.objectstore.ObjectStore;
-
 
 /**
  * Class used for retrieval and handling of information used in the display
@@ -44,7 +27,7 @@ import org.intermine.api.profile.BagValue;
  */
 public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
   /* define a LOG to post messages to */
-  protected static final Logger logger = Logger.getLogger(GeneExpressionGraphDisplayer.class);
+  protected static final Logger logger = Logger.getLogger(CompositeNetworkGraphBagDisplayer.class);
 
   /**
    * Constructor
@@ -65,27 +48,24 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
    * @param request
    * @param reportObject
    */
+  @SuppressWarnings("unchecked")
+  @Override
   public void display(HttpServletRequest request, ReportObject reportObject){
-    if( reportObject ==  null ){
-      request.setAttribute("hellow", "compositeNetworkGraphDisplayer.java - Object:null ");
-    }
-    else{
-      request.setAttribute("hellow", reportObject.getClass());
-    }
+    InterMineObject gene = (InterMineObject) reportObject.getObject();
     try{
-
-      InterMineObject gene = (InterMineObject) reportObject.getObject();
-      request.setAttribute("ids", new ArrayList<>(Arrays.asList((String) gene.getFieldValue("ncbiGeneId"))));
+      ArrayList<String> data = new ArrayList<String>();
+      data.add("ncbiGeneId");
+      String identifier = (String)gene.getFieldValue("ncbiGeneId");
+      data.add(identifier);
+      request.setAttribute("data", data);
     }
     catch(IllegalAccessException e){
       logger.error(e.getMessage());
     }
-
   }
 
   /**
    *
-   * This is the method called when
    * @param request
    * @param reportBag
    */

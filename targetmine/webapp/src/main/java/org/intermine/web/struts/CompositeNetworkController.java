@@ -1,7 +1,7 @@
 package org.intermine.web.struts;
 
 /*
- * Copyright (C) 2002-2020 FlyMine
+ * Copyright (C) 2002-2021 TargetMine
  *
  * This code may be freely distributed and modified under the
  * terms of the GNU Lesser General Public Licence.  This should
@@ -78,10 +78,6 @@ import org.intermine.web.displayer.ReportDisplayer;
 
 import org.intermine.api.profile.InterMineBag;
 
-// import org.intermine.webservice.client.core.ServiceFactory;
-// import org.intermine.webservice.client.services.QueryService;
-
-
 /**
  *
  * Based on BagDetailsController by Xavier Watkins
@@ -93,7 +89,7 @@ import org.intermine.api.profile.InterMineBag;
 public class CompositeNetworkController extends TilesAction{
 
   private static final int PAGE_SIZE = 10;
-  private static final Logger LOG = Logger.getLogger(BagDetailsController.class);
+  private static final Logger LOG = Logger.getLogger(CompositeNetworkController.class);
 
   /**
    * {@inheritDoc}
