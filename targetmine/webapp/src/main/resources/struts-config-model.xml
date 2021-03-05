@@ -30,12 +30,6 @@
 <action path="/proteinAnalysisResultRenderer"
         type="org.intermine.bio.web.widget.ProteinAnalysisResultImgRenderer"/>
 
-<!-- otherWidgets Menu Tab -->
-<action
-  path="/otherWidgets"
-  forward="otherWidgets.page"
-/>
-
 <!-- Second list of list details -->
 <action path="/compositeNetwork" forward="compositeNetwork.page"></action>
 <action

@@ -209,21 +209,6 @@
         <xsd:attribute name="parameters" type="xsd:string"></xsd:attribute>
     </xsd:complexType>
 
-    <xsd:complexType name="otherReportDisplayersType">
-      <xsd:sequence>
-        <xsd:element name="otherReportDisplayer" type="otherReportDisplayerType" maxOccurs"unbounded"></xsd:element>
-      </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="otherReportDisplayer">
-      <xsd:attribute name="javaClass" type="xsd:string"></xsd:attribute>
-      <xsd:attribute name="jspName" type="xsd:string"></xsd:attribute>
-      <xsd:attribute name="replacesFields" type="xsd:string"></xsd:attribute>
-      <xsd:attribute name="placement" type="xsd:string"></xsd:attribute>
-      <xsd:attribute name="types" type="xsd:string"></xsd:attribute>
-      <xsd:attribute name="parameters" type="xsd:string"></xsd:attribute>
-    </xsd:complexType>
-
     <xsd:complexType name="reportWidgetsType">
         <xsd:sequence>
             <xsd:element name="reportwidget" type="reportWidgetType" maxOccurs="unbounded" minOccurs="0"></xsd:element>

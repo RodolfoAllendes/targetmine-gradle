@@ -1120,19 +1120,6 @@
 
   </reportdisplayers>
 
-  <otherReportDisplayers>
-
-    <otherReportDisplayer
-      javaClass="org.intermine.bio.web.displayer.GeneExpressionGraphDisplayer"
-      jspName="model/geneExpressionGraphDisplayer.jsp"
-      replacesFields=""
-      placement="summary"
-      types="Gene"
-    />
-
-  </otherReportDisplayers>
-
-
 <!-- widgets -->
 <widgets>
 
@@ -1433,19 +1420,6 @@
                                  typeClass="Gene"
                                  views="primaryIdentifier, symbol, organism.name, probeSets.expressions.tissue.name"/>
 
-<!-- To be tested
-      <enrichmentwidgetdisplayer id="compound_protein_enrichment"
-                                 title="Protein Enrichment"
-                                 description="Protiens enriched for compounds in this list"
-                                 label="Protein"
-                                 startClass="Compound"
-                                 startClassDisplay="identifier"
-                                 enrich="targetProteins.protein.name"
-                                 enrichIdentifier="targetProteins.protein.primaryAccession"
-                                 typeClass="Compound"
-                                 views="identifier, name, targetProteins.protein.primaryAccession, targetProteins.protein.name, targetProteins.protein.organism.name,"
-                                 externalLink="/targetmine/portal.do?class=Protein&amp;externalids="/>
- -->
       <enrichmentwidgetdisplayer id="drug_atc_enrichment"
                                  title="ATC Classification Enrichment"
                                  description="ATC Classification enriched for drugs in this list"
@@ -1544,20 +1518,7 @@
                                  typeClass="KeggCompound"
                                  views="originalId, name, enzymes.ecNumber, enzymes.description"
                                  externalLink="/targetmine/portal.do?class=Enzyme&amp;externalids=" />
-<!--
-      <enrichmentwidgetdisplayer id="gene_mesh_enrichment"
-                                 title="MeSH Term Enrichment"
-                                 description="MeSH Terms enriched for genes in this list"
-                                 label="MeSH Terms"
-                                 startClass="Gene"
-                                 startClassDisplay="symbol"
-                                 enrich="publications.meshTerms.name"
-                                 enrichIdentifier="publications.meshTerms.identifier"
-                                 constraints="organism.taxonId=[list]"
-                                 typeClass="Gene"
-                                 views="primaryIdentifier, symbol, organism.name, publications.meshTerms.identifier, publications.meshTerms.name"
-                                 externalLink="/targetmine/portal.do?class=MeshTerm&amp;externalids="/>
- -->
+
 
 </widgets>
 </webconfig>
