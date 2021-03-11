@@ -32,8 +32,7 @@ export class SupraAdjacencyMatrixGraph extends TargetMineGraph{
 
 
     this.loadData(data).then( () => {
-      console.log('data loaded');
-
+      
       this.initXLabels();
       super.initXAxis();
       super.plotXAxis(90);

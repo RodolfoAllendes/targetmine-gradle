@@ -14,15 +14,15 @@ export class CompositeNetworkThreeJSGraph extends TargetMineGraph{
   /**
    * Constructor
    * @param {string} name The name of the network
-   * @param {string} data The ArrayList string representation of the data retrieved
-   * from the database
-   * @param {int} width
-   * @param {int} height
+   * @param {string} data The ArrayList string representation of the data 
+   * retrieved from the database (args[0])
+   * @param {string} containerId The DOM identifier of the element where the 
+   * visualization is placed (args[1]) 
+   * @param {int} width the width of the visualization container (args[1])
+   * @param {int} height the height of the visualization container (args[2])
    */
   constructor(name, ...args){
-    // data, containerId, width, height){
     /* initialize super class attributes */
-    // super('threeJSNetwork', name, width, height);
     super('threeJSNetwork', name, args[2], args[3]);
     
     /* define variables specific to the class */
@@ -32,7 +32,6 @@ export class CompositeNetworkThreeJSGraph extends TargetMineGraph{
     this._containerId = args[1];
 
     this.initDOM();
-
   }
 
   /**
@@ -152,15 +151,18 @@ export class CompositeNetworkThreeJSGraph extends TargetMineGraph{
     const scene = new THREE.Scene();
 
     const boxWidth = 1;
-const boxHeight = 1;
-const boxDepth = 1;
-const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+    const boxHeight = 1;
+    const boxDepth = 1;
+    const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-const material = new THREE.MeshBasicMaterial({color: 0x44aa88});
-const cube = new THREE.Mesh(geometry, material);
+    const material = new THREE.MeshBasicMaterial({color: 0x44aa88});
+    const cube = new THREE.Mesh(geometry, material);
 
-scene.add(cube);
-this._renderer.render(scene, camera);
+    const wire = new THREE.WireframeGeometry ( geometry );
+    const lines = new THREE.LineSegments(wire);
+
+    scene.add(lines);
+    this._renderer.render(scene, camera);
 
 // function render(time) {
 //   time *= 0.001;  // convert time to seconds

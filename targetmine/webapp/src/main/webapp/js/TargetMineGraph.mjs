@@ -25,13 +25,18 @@ export class TargetMineGraph {
     this._type = type;
     /* the title of the graph */
     this._name = name;
+    /* the id for the base container of the DOM elements used in the visualization */
+    this._containerId = undefined;
+
     /* the dimensions of the canvas are defined in user coordinates and NOT
      * pixel values */
     this._width = width;
     this._height = height;
+    
     /* margins are defined as blank space, in user coordinates, destined to
      * contain extra annotations to the graph */
     this._margin = {top: 40, right: 40, bottom: 40, left: 40};
+    // this._margin = undefined;
 
     /* data used for the generation of the graph */
     this._data = undefined;
@@ -49,6 +54,7 @@ export class TargetMineGraph {
 
     // the labels used in the x axis of the graph
     this._xLabels = undefined;
+    this._yLabels = undefined;
 
     /* the list of colors and shapes used to display data points */
     this._colors = undefined;
@@ -81,10 +87,12 @@ export class TargetMineGraph {
    * controls are grouped in tables, each of which has a Title and an optional
    * 'Add' button (that allows the user to add elements during execution).
    *
-   * @param {string} containerId The id of the container where DOM elements for
-   * the graph will be added.
    * @param {Object} columnElements The list of tables that will be added to the
    * right column of the container
+   * @param {string} containerId The id of the container where DOM elements for
+   * the graph will be added.
+   * @param {string} panelType The type of panel to be added on the 
+   * 
    */
   initDOM(columnElements=undefined, containerId=undefined ){
     let container = ( containerId === undefined ) ? d3.select('.targetmineGraphDisplayer') : d3.select('#'+containerId);
@@ -370,7 +378,7 @@ export class TargetMineGraph {
             .y(function(d){ return(Y(d.x0)) } )
             .curve(d3.curveCatmullRom)    // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
           )
-    // }
+  
   }
 
   /**

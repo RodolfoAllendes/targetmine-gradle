@@ -15,7 +15,6 @@
 <div id= <%= containerId %> class='targetmineGraphDisplayer'></div>
 
 <script type="text/javascript">
-  console.log("containerid", '<%= containerId %>');
   import(window.location.origin+'/targetmine/js/SupraAdjacencyMatrixGraph.mjs')
     .then((module) => {
       window.supraAdjacencyMatrixGraph = new module.SupraAdjacencyMatrixGraph(

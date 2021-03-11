@@ -3,10 +3,10 @@ package org.intermine.bio.web.displayer;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
-// import java.util.Set;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-// import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSession;
 
 
 import org.apache.log4j.Logger;
@@ -17,6 +17,13 @@ import org.intermine.web.displayer.BagDisplayer;
 import org.intermine.web.logic.config.ReportDisplayerConfig;
 import org.intermine.web.logic.results.ReportObject;
 import org.intermine.api.profile.BagValue;
+
+
+// extra imports
+import org.intermine.metadata.ClassDescriptor;
+import org.intermine.metadata.CollectionDescriptor;
+import org.intermine.metadata.Model;
+import org.intermine.web.logic.session.SessionMethods;
 
 /**
  * Class used for retrieval and handling of information used in the display
@@ -58,8 +65,31 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
       String identifier = (String)gene.getFieldValue("ncbiGeneId");
       data.add(identifier);
       request.setAttribute("data", data);
+
+
+      /** Desde aqui es una prueba para cargar el modelo */
+      HttpSession session = request.getSession();
+      final InterMineAPI im = SessionMethods.getInterMineAPI(session);
+      Model model = im.getModel();
+            
+      request.setAttribute("rootClass", model.getQualifiedTypeName(reportObject.getType()));
+
+      ClassDescriptor cld = reportObject.getClassDescriptor();
+      
+      request.setAttribute("fieldDescriptors", cld.getFieldDescriptors());
+
+      ArrayList<String> collectionDescriptors = new ArrayList<String>();
+      for( CollectionDescriptor coldes: cld.getCollectionDescriptors() ){
+        // collectionDescriptors.add(coldes.getName());
+        collectionDescriptors.add(coldes.getReferencedClassDescriptor().getName());
+      }
+
+      request.setAttribute("collectionDescriptors", collectionDescriptors);
+      
+      
+      
     }
-    catch(IllegalAccessException e){
+    catch(IllegalAccessException | ClassNotFoundException e){
       logger.error(e.getMessage());
     }
   }
@@ -72,39 +102,6 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
   @SuppressWarnings("unchecked")
   @Override
   public void display(HttpServletRequest request, InterMineBag reportBag){
-    /** init required stuff */
-    // HttpSession session = request.getSession();
-    // final InterMineAPI im = SessionMethods.getInterMineAPI(session);
-    // ObjectStore os = im.getObjectStore();
-    // Model model = os.getModel();
-    //
-    // PathQuery query = new PathQuery(model);
-    //
-    // // Select the output columns:
-    // query.addViews("Gene.primaryIdentifier",
-    //         "Gene.symbol",
-    //         "Gene.name",
-    //         "Gene.organism.name");
-    //
-    // // Add orderby
-    // query.addOrderBy("Gene.primaryIdentifier", OrderDirection.ASC);
-    //
-    // // Filter the results with the following constraints:
-    // query.addConstraint(Constraints.lookup("Gene", "351", null));
-    //
-    // os.execute(query);
-
-    //
-    // QueryService service = factory.getQueryService();
-    // PrintStream out = System.out;
-    // String format = "%-22.22s | %-22.22s | %-22.22s | %-22.22s\n";
-    // out.printf(format, query.getView().toArray());
-    // Iterator<List<Object>> rows = service.getRowListIterator(query);
-    // while (rows.hasNext()) {
-    //     out.printf(format, rows.next().toArray());
-    // }
-    // out.printf("%d rows\n", service.getCount(query));
-
     // Retrieve the information for the bag
     request.setAttribute("bagName", reportBag.getName());
     try{
@@ -119,6 +116,25 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
       }
       request.setAttribute("data",data);
 
+      /** This is to retrieve the possible extensions for the network */
+      HttpSession session = request.getSession();
+      final InterMineAPI im = SessionMethods.getInterMineAPI(session);
+      Model model = im.getModel();
+      
+      request.setAttribute("rootClass", model.getQualifiedTypeName(reportBag.getType()));
+
+      ClassDescriptor cld = model.getClassDescriptorByName(reportBag.getType());
+      
+      request.setAttribute("fieldDescriptors", cld.getFieldDescriptors());
+
+      ArrayList<String> collectionDescriptors = new ArrayList<String>();
+      for( CollectionDescriptor coldes: cld.getCollectionDescriptors() ){
+        // collectionDescriptors.add(coldes.getName());
+        collectionDescriptors.add(coldes.getReferencedClassDescriptor().getName());
+      }
+
+      request.setAttribute("collectionDescriptors", collectionDescriptors);
+      
     } //try
     catch(Exception e){
       logger.error(e.getMessage());

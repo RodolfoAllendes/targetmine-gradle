@@ -14,31 +14,45 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   /**
    * Constructor
    * @param {string} name The name of the network
-   * @param {string} data The ArrayList string representation of the data retrieved
-   * from the database
-   * @param {int} width
-   * @param {int} height
+   * @param {Array} args Other arguments given to the constructor. These should 
+   * as follows:
+   * args[0] data (string)
+   * args[1] containerId (string)
+   * args[2] width of the container (int)
+   * args[3] height of the container (int)
+   * @param {string} data The ArrayList string representation of the data 
+   * retrieved from the database args[0]
+   * @param {string} containerId The DOM identifier of the container for the
+   * visualization args[1]
+   * @param {int} width the width of the visualization container args[2]
+   * @param {int} height the height of the visualization container args[3]
    */
-  constructor(name, data, width, height){
+  constructor(name, ...args){
     /* initialize super class attributes */
-    super('compositeNetwork', name, width, height);
+    // super('compositeNetwork', name, args[3],args[4]);
+    
+    /* args[0] should contain initial data for the visualiation */
+    // if( args[0] !== undefined )
+    //   this.loadData(args[0]);
+    // /* and class attributes */
+    // this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
+    // this._network = new MultiLayerNetwork();
+    // this._cy = undefined;
+    
+    // /* initialize general DOM elements */
+    // this.initDOM();
 
-    /* define variables specific to the class */
-    this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
-    this._cy = undefined;
-    this._network = new MultiLayerNetwork();
-
-    this.initDOM();
-
-    let self = this;
-    this.loadData(data).then( () => {
-      self._cy.add( self._network.getCytoscapeElements() );
-      self._cy.layout({name: 'grid'}).run();
-    });
+    // let self = this;
+    // this.loadData(data).then( () => {
+    //   self._cy.add( self._network.getCytoscapeElements() );
+    //   self._cy.layout({name: 'grid'}).run();
+    // });
   }
 
   /**
-   * use data to load initial layer of the network
+   * Load initial data for the visualization
+   * This initial list of identifiers should be used to define the first layer 
+   * of the multi-layer network
    *
    * @param {string} data Java ArrayList string representation of the ncbiGeneId
    * for element in the initial bag
