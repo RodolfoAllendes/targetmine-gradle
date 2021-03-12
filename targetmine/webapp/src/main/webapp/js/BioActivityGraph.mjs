@@ -17,12 +17,18 @@ export class BioActivityGraph extends TargetMineGraph{
    * @param {string} name The title for the graph
    * @param {string} data The Java ArrayList string representation of the data
    * retrieved from the database for the construction of the graph
+   * @param {string} containerId The id of the container to place the visualization
    * @param {int} width The width of the viewBox in the svg element
    * @param {int} height The height of the viewBox in the svg element
    */
-  constructor(name, data, width, height){
+  constructor(name, data, containerId, width, height){
     /* initialize super class attributes */
-    super('bioActivity', name, width, height);
+    super('bioActivity');
+    super.setName(name);
+    super.setContainerId(containerId);
+    super.setWidth(width);
+    super.setHeight(height);
+
     /* initial variables for X and Y axis */
     this._x = 'Activity Type';
     this._y = 'Activity Concentration';
@@ -30,7 +36,7 @@ export class BioActivityGraph extends TargetMineGraph{
     /* parse data to local storage */
     super.loadData(data);
     if( this._data.length === 0 ){
-      d3.select('.targetmineGraphDisplayer').text('No BioActivity Data to Display.');
+      d3.select('#'+this._containerId).text('No BioActivity Data to Display.');
       return;
     }
     /* Initialize the Axis of the graph */
@@ -59,13 +65,29 @@ export class BioActivityGraph extends TargetMineGraph{
    * Initialize BioActivityGraph specific DOM elements
    */
   initDOM(){
-    /* init Common DOM elements */
-    let columnElements = [
+    const mainElement = {
+      type: 'svg', 
+      attr: new Map([
+        ['id',`canvas_${this._type}`],
+        ['class',`targetMineGraphSVG`],
+        ['viewBox', `0 0 ${this._width} ${this._height}`],
+      ]),
+      child: [
+        {
+          type: 'g',
+          attr: new Map([
+            ['id', 'graph'],
+          ]),
+        }
+      ],
+    };
+       
+    const columnElements = [
       { 'name': 'color', 'text': 'Color Table', 'button': true },
       { 'name': 'shape', 'text': 'Shape Table', 'button': true },
       { 'name': 'visuals', 'text': 'Other Visuals', 'button': false },
     ];
-    super.initDOM(columnElements);
+    super.initDOM(mainElement, columnElements);
 
     let self = this;
     /* First, we update the three tables used for visualization handling within

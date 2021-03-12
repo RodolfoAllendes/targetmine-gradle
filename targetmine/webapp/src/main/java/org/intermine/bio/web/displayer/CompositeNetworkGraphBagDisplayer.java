@@ -45,6 +45,7 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
   }
 
   /**
+   * Display method for Objects.
    * As this class extends ReportDisplayer (through BagDisplayer) it has to
    * provide an implementation for the abstract method 'display' that receives
    * a reportObject as parameter.
@@ -58,36 +59,34 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
   @SuppressWarnings("unchecked")
   @Override
   public void display(HttpServletRequest request, ReportObject reportObject){
+    // Retrieve the information from the single reportObject
     InterMineObject gene = (InterMineObject) reportObject.getObject();
     try{
+      /* first we set the name of the graph element */
+      String geneID = (String)gene.getFieldValue("ncbiGeneId");
+      request.setAttribute("name", geneID);
+
+      /* the initial data points to be visualized */
       ArrayList<String> data = new ArrayList<String>();
       data.add("ncbiGeneId");
-      String identifier = (String)gene.getFieldValue("ncbiGeneId");
-      data.add(identifier);
+      data.add(geneID);
       request.setAttribute("data", data);
 
-
-      /** Desde aqui es una prueba para cargar el modelo */
+      /* and the extra data required for the expansion of the multi-layer network */
       HttpSession session = request.getSession();
       final InterMineAPI im = SessionMethods.getInterMineAPI(session);
       Model model = im.getModel();
             
+      /* the class of the root elements */
       request.setAttribute("rootClass", model.getQualifiedTypeName(reportObject.getType()));
 
+      /* and the collections linked by these elements */
       ClassDescriptor cld = reportObject.getClassDescriptor();
-      
-      request.setAttribute("fieldDescriptors", cld.getFieldDescriptors());
-
       ArrayList<String> collectionDescriptors = new ArrayList<String>();
       for( CollectionDescriptor coldes: cld.getCollectionDescriptors() ){
-        // collectionDescriptors.add(coldes.getName());
         collectionDescriptors.add(coldes.getReferencedClassDescriptor().getName());
       }
-
-      request.setAttribute("collectionDescriptors", collectionDescriptors);
-      
-      
-      
+      request.setAttribute("collections", collectionDescriptors);
     }
     catch(IllegalAccessException | ClassNotFoundException e){
       logger.error(e.getMessage());
@@ -95,18 +94,21 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
   }
 
   /**
-   *
+   * Display method for bags.
+   * As an extension of BagDisplayer, we also need to implement the display 
+   * method for Bag elements.
+   * 
    * @param request
    * @param reportBag
    */
   @SuppressWarnings("unchecked")
   @Override
   public void display(HttpServletRequest request, InterMineBag reportBag){
-    // Retrieve the information for the bag
-    request.setAttribute("bagName", reportBag.getName());
+    /* first, we set the name of the graph element */
+    String bagName = reportBag.getName();
+    request.setAttribute("name", bagName);
     try{
-      // A list of data elements that we will forward to Javascript for the
-      // definition of the graph
+      /* the initial data points for the visualization */
       ArrayList<String> data = new ArrayList<String>();
       data.add("ncbiGeneId");
       List<BagValue> values = reportBag.getContents();
@@ -116,25 +118,21 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
       }
       request.setAttribute("data",data);
 
-      /** This is to retrieve the possible extensions for the network */
+      /* and the extra data required for the expansion of the multi-layer network */
       HttpSession session = request.getSession();
       final InterMineAPI im = SessionMethods.getInterMineAPI(session);
       Model model = im.getModel();
       
+      /* the class of the root elements */
       request.setAttribute("rootClass", model.getQualifiedTypeName(reportBag.getType()));
 
+      /* and the collections linked by these elements */
       ClassDescriptor cld = model.getClassDescriptorByName(reportBag.getType());
-      
-      request.setAttribute("fieldDescriptors", cld.getFieldDescriptors());
-
       ArrayList<String> collectionDescriptors = new ArrayList<String>();
       for( CollectionDescriptor coldes: cld.getCollectionDescriptors() ){
-        // collectionDescriptors.add(coldes.getName());
         collectionDescriptors.add(coldes.getReferencedClassDescriptor().getName());
       }
-
-      request.setAttribute("collectionDescriptors", collectionDescriptors);
-      
+      request.setAttribute("collections", collectionDescriptors);
     } //try
     catch(Exception e){
       logger.error(e.getMessage());

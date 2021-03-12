@@ -4,31 +4,35 @@
 <%@ taglib tagdir="/WEB-INF/tags" prefix="im"%>
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 
+<%! String containerId = "compositeNetworkGraph-div"; %>
+
 <div class='collection-table'>
 <h3>Composite Network Graph</h3>
 
 <!-- Visualization Container -->
-<!-- <div id='compositeID' class='targetmineGraphDisplayer'></div> -->
+<div id=<%=containerId%> class='targetmineGraphDisplayer'></div>
 
+<!-- Visualization Definition -->
 <script type="text/javascript">
   import(window.location.origin+'/targetmine/js/CompositeNetworkGraph.mjs')
     .then((module) => {
-      // let width = 400;
-      // let height = 400;
-      // let containerId = 'compositeNetworkGraph-div';
+      // dimensions for the visualization
+      let width = 400;
+      let height = 400;
+      
+      /* make sure that all the information required for the visualization 
+       * is correctly obtained from the Java code */
+      console.log('Name: ${name}');
+      console.log('Data: ${data}');
+      console.log('Root elements: ${rootClass}');
+      console.log('Collections: ${collections}');
 
-      // console.log('path: ${path}');
-      // console.log('prefix: ${prefix}');
-      console.log('Base elements: ${rootClass}');
-      console.log('collectionDescriptors: ${collectionDescriptors}');
-
-      // window.compositeNetworkGraph = new module.CompositeNetworkGraph(
-      //   '${bagName}', //args[0]
-      //   '${data}', //args[1]
-      //   containerId, //args[2]
-      //   width, //args[3]
-      //   height, //args[4]
-      // );
+      window.compositeNetworkGraph = new module.CompositeNetworkGraph(
+        '${name}',
+        '${data}',
+        '<%=containerId%>',
+        width, height
+      );
     });
 </script>
 </div>

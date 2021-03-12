@@ -11,27 +11,24 @@ export class TargetMineGraph {
 
   /**
    * Initialize a new instance of TargetMineGraph
-   * This is a general container for any graph definition added to TargetMine,
-   * thus, information such as the type of graph and general aspects as the size
-   * of it should be stored
+   * This is a general container for any graph definition added to TargetMine
+   * that uses a displayer, thus, only information such as the type of graph and 
+   * general aspects as the size of it should be stored
    *
    * @param {string} type The type of graph being displayed
-   * @param {string} name The title for the graph
-   * @param {int} width The width of the viewbox in the svg element
-   * @param {int} height The height of the viewBox in the svg element
    */
-  constructor(type, name, width, height){
+  constructor(type){
     /* the type of graph */
     this._type = type;
     /* the title of the graph */
-    this._name = name;
+    this._name = undefined;
     /* the id for the base container of the DOM elements used in the visualization */
     this._containerId = undefined;
 
     /* the dimensions of the canvas are defined in user coordinates and NOT
      * pixel values */
-    this._width = width;
-    this._height = height;
+    this._width = undefined;
+    this._height = undefined;
     
     /* margins are defined as blank space, in user coordinates, destined to
      * contain extra annotations to the graph */
@@ -62,6 +59,38 @@ export class TargetMineGraph {
   }
 
   /**
+   * Set the name of the graph
+   * @param {string} name The title for the graph
+   */
+  setName(name){
+    this._name = name;
+  }
+
+  /**
+   * Set the visualization container's ID
+   * @param {string} containerId The id for the container of the visualization
+   */
+  setContainerId(containerId){
+    this._containerId = containerId;
+  }
+
+  /**
+   * Set the width of the visualization
+   * @param {int} width The width of the visualization
+   */
+  setWidth(width){
+    this._width = width;
+  }
+
+  /**
+   * Set the height of the visualization
+   * @param {int} height The height of the visualization
+   */
+  setHeight(height){
+    this._height = height;
+  }
+
+  /**
    * Load data for graph display
    * Data is provided by TargetMine in the form of an ArrayList. The first
    * element includes the names for the data columns, with the following n-1
@@ -87,52 +116,63 @@ export class TargetMineGraph {
    * controls are grouped in tables, each of which has a Title and an optional
    * 'Add' button (that allows the user to add elements during execution).
    *
-   * @param {Object} columnElements The list of tables that will be added to the
-   * right column of the container
-   * @param {string} containerId The id of the container where DOM elements for
-   * the graph will be added.
-   * @param {string} panelType The type of panel to be added on the 
-   * 
+   * @param {string} panelType The type of panel to be added as main visualization
+   * area
+   * @param {Object} mainElement When provided, it lists DOM elements that
+   * should be appended to the main visualization panel
+   * @param {Object} columnElements When provided, it lists the elements that 
+   * should be added to the right column of the container 
    */
-  initDOM(columnElements=undefined, containerId=undefined ){
-    let container = ( containerId === undefined ) ? d3.select('.targetmineGraphDisplayer') : d3.select('#'+containerId);
-    // Left Column of the Visualization (main display)
-    container.append('svg')
-      .attr('id', 'canvas_'+this._type)
-      .attr('class', 'targetmineGraphSVG')
-      .attr('viewBox', '0 0 '+this._width+' '+this._height)
-      .append('g')
-        .attr('id', 'graph')
-    ;
-    // Right Column, reserved for visualization controls
-    container.append('div')
-      .attr('class', 'rightColumn')
-    ;
+  initDOM(mainElement, columnElements){
+    // select the main container element for the displayer
+    let container = d3.select(`#${this._containerId}`);
+    console.log('container',container);
+    // Add the main visualization display
+    if( mainElement !== undefined ){
+      let main = container.append(mainElement.type);
+      console.log('main',main.attr);
+      for ( let[k,v] in mainElement.attr ) {
+        main.attr(k, v);
+      }
+      
+      // main.attr('class', 'targetmineGraphSVG');
+      // main.attr('viewBox', `0 0 ${this._width} ${this._height}`);
+    }
+    // main.append('g')
+    //   .attr('id', 'graph')
+    // ;
+    
+    // // Add a right-side column for visualization controls
+    // if( columnElements !== undefined ){
+    //   container.append('div')
+    //     .attr('class', 'rightColumn')
+    //   ;
 
-    // Add individual right column elements
-    d3.select('.rightColumn').selectAll('div')
-      .data(columnElements)
-      .enter().append('div')
-      .attr('id', d => d.name+'-div')
-      .each(function(d) {
-        d3.select(this).append('br');
-        d3.select(this).append('label')
-          .attr('for', d.name+'-table')
-          .text(d.text)
-        ;
-        d3.select(this).append('table')
-          .attr('id', d.name+'-table')
-          .append('tbody')
-          ;
-        if( d.button ){
-          d3.select(this).append('button')
-            .attr('id', d.name+'-add' )
-            .text('Add')
-          ;
-        }
-      })
-      .exit().remove()
-    ;
+    // // Add individual right column elements
+    // d3.select('.rightColumn').selectAll('div')
+    //   .data(columnElements)
+    //   .enter().append('div')
+    //   .attr('id', d => d.name+'-div')
+    //   .each(function(d) {
+    //     d3.select(this).append('br');
+    //     d3.select(this).append('label')
+    //       .attr('for', d.name+'-table')
+    //       .text(d.text)
+    //     ;
+    //     d3.select(this).append('table')
+    //       .attr('id', d.name+'-table')
+    //       .append('tbody')
+    //       ;
+    //     if( d.button ){
+    //       d3.select(this).append('button')
+    //         .attr('id', d.name+'-add' )
+    //         .text('Add')
+    //       ;
+    //     }
+    //   })
+    //   .exit().remove()
+    // ;
+    // }
 
   }
 

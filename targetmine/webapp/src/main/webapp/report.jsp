@@ -23,8 +23,6 @@
   var imSummaryFields = {
     type : "${object.type}"
   };
-  console.log("Object del report:", "${object}");
-
 </script>
 
 <c:choose>

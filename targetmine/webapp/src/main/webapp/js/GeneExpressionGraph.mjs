@@ -21,12 +21,17 @@ export class GeneExpressionGraph extends TargetMineGraph{
    * @param {string} name The title for the graph
    * @param {data} data The Java ArrayList string representation of the data
    * retrieved from the database for the construction of the graph
+   * @param {string} containerId The id of the container to place the visualization
    * @param {int} width The width of the viewBox in the svg element
    * @param {int} height The height of the viewBox in the svg element
    */
-  constructor(name, data, width, height){
+  constructor(name, data, containerId, width, height){
     /* initialize super-class attributes */
-    super('geneExpression', name, width, height);
+    super('geneExpression');
+    super.setName(name);
+    super.setContainerId(containerId);
+    super.setWidth(width);
+    super.setHeight(height);
 
     /* Title for each axis in the graph */
     this._x = undefined;
@@ -46,7 +51,7 @@ export class GeneExpressionGraph extends TargetMineGraph{
     /* parse data to local storage */
     this.loadData(data);
     if( this._data.length === 0 ){
-      d3.select('.targetmineGraphDisplayer').text('No Gene Expression Data to Display');
+      d3.select('#'+this._containerId).text('No Gene Expression Data to Display');
       return;
     }
     /* Initialize the tree structure of levels for the graph */
@@ -171,10 +176,13 @@ export class GeneExpressionGraph extends TargetMineGraph{
    */
   initDOM(){
     /* init common DOM elements */
+    const mainElements = [
+      { type: 'g', attr: [{ id: 'graph' }] }
+    ];
     let columnElements = [
       { 'name': 'visuals', 'text': 'Other Visuals', 'button': false },
     ];
-    super.initDOM(columnElements);
+    super.initDOM('svg', mainElements, columnElements);
   }
 
   /**

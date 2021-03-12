@@ -14,12 +14,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   /**
    * Constructor
    * @param {string} name The name of the network
-   * @param {Array} args Other arguments given to the constructor. These should 
-   * as follows:
-   * args[0] data (string)
-   * args[1] containerId (string)
-   * args[2] width of the container (int)
-   * args[3] height of the container (int)
    * @param {string} data The ArrayList string representation of the data 
    * retrieved from the database args[0]
    * @param {string} containerId The DOM identifier of the container for the
@@ -27,20 +21,21 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    * @param {int} width the width of the visualization container args[2]
    * @param {int} height the height of the visualization container args[3]
    */
-  constructor(name, ...args){
+  constructor(name, data, containerId, width, height){
     /* initialize super class attributes */
-    // super('compositeNetwork', name, args[3],args[4]);
+    super('compositeNetwork');
+    super.setName(name);
+    super.setContainerId(containerId);
+    super.setWidth(width);
+    super.setHeight(height);
     
-    /* args[0] should contain initial data for the visualiation */
-    // if( args[0] !== undefined )
-    //   this.loadData(args[0]);
-    // /* and class attributes */
-    // this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
-    // this._network = new MultiLayerNetwork();
-    // this._cy = undefined;
-    
-    // /* initialize general DOM elements */
-    // this.initDOM();
+    /* and class attributes */
+    this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
+    this._network = new MultiLayerNetwork();
+    this._cy = undefined;
+
+    /* initialize general DOM elements */
+    this.initDOM();
 
     // let self = this;
     // this.loadData(data).then( () => {
@@ -148,31 +143,36 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    */
   initDOM(){
     /* init common DOM elements */
-    let container = d3.select('#compositeNetworkGraph-div');
-    let cydiv = container.append('div')
-      .attr('id', 'canvas_'+this._type)
-      .attr('class', 'targetmineGraphCytoscape')
-      .ready
-      ;
+    const mainElements=[
+      { type: 'div'}
+    ];
+    super.initDOM('div', undefined, undefined);
 
-    this._cy = cytoscape({
-      container: jQuery('.targetmineGraphCytoscape'),
-      style:[
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'shape': 'data(shape)',
-            'background-color': 'data(color)',
-            'border-color': 'data(borderColor)',
-            'border-width': '1px',
-            'display': 'element',
-          }
-        }
-      ],
-    });
+
+    // let cydiv = container.append('div')
+    //   .attr('id', 'canvas_'+this._type)
+    //   .attr('class', 'targetmineGraphCytoscape')
+    //   .ready
+    //   ;
+
+    // this._cy = cytoscape({
+    //   container: jQuery('.targetmineGraphCytoscape'),
+    //   style:[
+    //     {
+    //       selector: 'node',
+    //       style: {
+    //         'label': 'data(label)',
+    //         'text-valign': 'center',
+    //         'text-halign': 'center',
+    //         'shape': 'data(shape)',
+    //         'background-color': 'data(color)',
+    //         'border-color': 'data(borderColor)',
+    //         'border-width': '1px',
+    //         'display': 'element',
+    //       }
+    //     }
+    //   ],
+    // });
   }
 
   /**

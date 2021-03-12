@@ -24,7 +24,7 @@ div.targetmineGraphDisplayer{
   height: 400px;
 }
 /* Definitions for the SVG (left) area of the graph */
-svg.targetmineGraphSVG{
+.targetmineGraphSVG{
   flex-grow: 1;
   width: 100%;
   height: inherit; /* auto; */
@@ -95,30 +95,9 @@ div.modal-content {
   width: 80%; /* Could be more or less, depending on screen size */
 }
 
-
-/* h3.modal-title{
-  grid-column: span 3;
-}
-
-label.modal-label{
-  grid-column: 1;
-}
-
-.modal-item{
-  width: 50%;
-  position: relative;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-} */
-
 button.modal-button{
   width: 30%;
 }
-
-/* select.modal-select{
-  grid-column: 3;
-} */
 
 /* The Close Button */
 span.close {
