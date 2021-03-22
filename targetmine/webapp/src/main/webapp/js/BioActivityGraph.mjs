@@ -65,117 +65,144 @@ export class BioActivityGraph extends TargetMineGraph{
    * Initialize BioActivityGraph specific DOM elements
    */
   initDOM(){
-    const mainElement = {
-      type: 'svg', 
-      attr: new Map([
-        ['id',`canvas_${this._type}`],
-        ['class',`targetMineGraphSVG`],
-        ['viewBox', `0 0 ${this._width} ${this._height}`],
-      ]),
-      child: [
-        {
-          type: 'g',
-          attr: new Map([
-            ['id', 'graph'],
-          ]),
-        }
-      ],
-    };
-       
-    const columnElements = [
-      { 'name': 'color', 'text': 'Color Table', 'button': true },
-      { 'name': 'shape', 'text': 'Shape Table', 'button': true },
-      { 'name': 'visuals', 'text': 'Other Visuals', 'button': false },
-    ];
-    super.initDOM(mainElement, columnElements);
-
     let self = this;
+    const elements = [
+      { 
+        type: 'svg',
+        id: `canvas_${this._type}`, 
+        attributes: new Map([
+          ['class','targetmineGraphSVG'],
+          ['viewBox', `0 0 ${this._width} ${this._height}`],
+        ]),
+        children: [
+          { 
+            type: 'g', 
+            id: 'graph' 
+          }  
+        ],
+      },
+      { 
+        type: 'div',
+        id: `rightColumn_${this._type}`,
+        attributes: new Map([
+          ['class', 'rightColumn'],
+        ]),
+        children:[
+          { 
+            type: 'div', 
+            id: 'color-div', 
+            children: [
+              { type: 'br', },
+              { type: 'label', attributes: new Map([ ['text', 'Color Table'] ])},
+              { type: 'table', id: 'color-table', children: [ {type: 'tbody'}]},
+              { 
+                type: 'button', 
+                id: 'color-add', 
+                attributes: new Map([ ['text', 'Add'] ]),
+                on: new Map([ ['click', function(){ self.modalDisplay('color')}] ]),
+              },
+            ]
+          },
+          { 
+            type: 'div', 
+            id: 'shape-div', 
+            children: [
+              { type: 'br', },
+              { type: 'label', attributes: new Map([ ['text', 'Shape Table'] ])},
+              { type: 'table', id: 'shape-table', children: [ {type: 'tbody'}] },
+              { 
+                type: 'button', 
+                id: 'shape-add', 
+                attributes: new Map([ ['text', 'Add'] ]),
+                on: new Map([ ['click',function(){ self.modalDisplay('shape'); }] ])
+              },
+            ]
+          },
+          { 
+            type: 'div', 
+            id: 'visuals-div', 
+            children: [
+              { type: 'br', },
+              { type: 'label', attributes: new Map([ ['text', 'Other Visuals'] ])},
+              { type: 'table', id: 'visuals-table', children: [ {type: 'tbody'}]},
+            ]
+          }
+        ]
+      },
+      { 
+        type: 'div',
+        id: 'modal',
+        attributes: new Map([ ['class', 'modal'], ]),
+        children:[
+          { 
+            type: 'div',
+            id: 'modal-content',
+            attributes: new Map([ ['class', 'modal-content'], ]),
+            children:[
+              { 
+                type: 'h3',
+                id: 'modal-title',
+                attributes: new Map([ ['class', 'modal-title'], ]),
+              },
+              { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Category:'] ]), },
+              { 
+                type: 'select',
+                id: 'modal-column-select',
+                attributes: new Map([ ['class','modal-item modal-select'] ]),
+                on: new Map([ ['change',function(e){
+                  console.log('estoy aqui');
+                  let values = [...new Set(self._data.map(pa => pa[e.target.value]))];
+                  self.updateSelectOptions('#modal-value-select', values);}] ]),
+              },
+              { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Value:'] ]) },
+              { 
+                type: 'select',
+                id: 'modal-value-select',
+                attributes: new Map([ ['class','modal-item modal-select'], ]),
+              },
+              { 
+                type: 'div', 
+                id: 'modal-input', 
+                attributes: new Map([ ['class','modal-content'], ]),
+                style: new Map([ ['grid-column','span 3'], ]),
+              },
+              { 
+                type: 'button', 
+                id: 'modal-ok', 
+                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'OK'] ]),
+                style: new Map([ ['grid-column', '3'] ]),
+                on: new Map([ ['click', function(){self.modalOK()} ] ]) 
+              },
+              { 
+                type: 'button', 
+                id: 'modal-cancel', 
+                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'Cancel'] ]),
+                style: new Map([ ['grid-column','3'] ]),
+                on: new Map([ ['click',function(){ d3.select('#modal').style('display','none'); }] ]),
+              },
+            ],
+          }
+        ]   
+      }
+    ];
+
+    super.addToDOM(this._containerId, elements);
+
     /* First, we update the three tables used for visualization handling within
      * the graph */
     this.updateColorTable();
     this.updateShapeTable();
     this.updateVisualsTable();
 
-    /* A modal component is used by the user to select colors and shapes used
-     * for the display of points */
-    let container = d3.select('.targetmineGraphDisplayer')
-      .append('div')
-        .attr('id', 'modal')
-        .attr('class', 'modal')
-        .append('div')
-          .attr('id', 'modal-content')
-          .attr('class', 'modal-content')
-    ;
-    /* add title to the modal */
-    let content = d3.select('.targetmineGraphDisplayer').select('#modal-content');
-    content.append('h3')
-      .attr('id', 'modal-title')
-      .attr('class', 'modal-title')
-      ;
-    /* In order to a color/shape to be applied, two different levels of selection
-     * have to be specified. These are refered to as 'column' and 'value'. Here
-     * we add the components required for user selection */
-    content.append('label')
-      .attr('class', 'modal-item modal-label')
-      .text('Category:')
-      ;
-    let colSelect = content.append('select')
-      .attr('class', 'modal-item modal-select')
-      .attr('id','modal-column-select')
-      ;
-    content.append('label')
-      .attr('class', 'modal-item modal-label')
-      .text('Value:')
-      ;
-    content.append('select')
-      .attr('class', 'modal-item modal-select')
-      .attr('id', 'modal-value-select')
-      ;
     /* 'column' options are fixed */
-    let opts = this._data.columns.reduce((prev, curr, i) => {
-      if( typeof(self._data[0][curr]) === 'string' ) prev.push(curr);
-      return prev;
-    },[]);
-    colSelect.selectAll('option')
-      .data(opts)
-      .enter().append('option')
-        .attr('value', d => d)
-        .text(d => d)
-      ;
-    /* but each time a new column is selected, the options in the 'value' select
-     * need to be updated */
+    self.updateSelectOptions('#modal-column-select', [...new Set(this._data.columns.filter( e => typeof(this._data[0][e]) === 'string'))]);
+    // /* but each time a new column is selected, the options in the 'value' select
+    //  * need to be updated */
     d3.select('#modal-column-select')//.selectAll('option')
-      .on('change', function(e){
-        let values = [...new Set(self._data.map(pa => pa[e.target.value]))];
-        self.updateSelectOptions('#modal-value-select', values);
-      })
+    //   .on('change', 
+    //   })
       .dispatch('change') // make sure to initially update the values
       ;
-
-    // /* The space for the color/shape input elements */
-    content.append('div')
-      .attr('id', 'modal-input')
-      .attr('class', 'modal-content')
-      .style('grid-column', 'span 3')
-    ;
-    /* OK and Cancel buttons */
-    content.append('button')
-      .attr('class', 'modal-item modal-button')
-      .attr('id','modal-ok')
-      .text('OK')
-    ;
-    content.append('button')
-      .attr('class', 'modal-item modal-button')
-      .attr('id', 'modal-cancel')
-      .style('grid-column', '3')
-      .text('Cancel')
-    ;
-
-    /* bind functionality to Righ-column interface elements */
-    d3.select('#color-add').on('click', function(){ self.modalDisplay('color') });
-    d3.select('#shape-add').on('click', function(){ self.modalDisplay('shape'); });
-    d3.select('#modal-ok').on('click', function(){ self.modalOK(); });
-    d3.select('#modal-cancel').on('click', function(){ d3.select('#modal').style('display', 'none'); });
   }
 
   /**

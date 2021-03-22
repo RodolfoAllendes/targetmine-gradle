@@ -110,72 +110,40 @@ export class TargetMineGraph {
     this._data = d3.tsvParse(data, d3.autoType);
   }
 
-  /**
+/**
    * Initialize Visualization Handling elements
-   * A panel with controls is added to the right side of each graph. These
-   * controls are grouped in tables, each of which has a Title and an optional
-   * 'Add' button (that allows the user to add elements during execution).
-   *
-   * @param {string} panelType The type of panel to be added as main visualization
-   * area
-   * @param {Object} mainElement When provided, it lists DOM elements that
+   * @param {Object} elements When provided, it lists DOM elements that
    * should be appended to the main visualization panel
-   * @param {Object} columnElements When provided, it lists the elements that 
-   * should be added to the right column of the container 
    */
-  initDOM(mainElement, columnElements){
-    // select the main container element for the displayer
-    let container = d3.select(`#${this._containerId}`);
-    console.log('container',container);
-    // Add the main visualization display
-    if( mainElement !== undefined ){
-      let main = container.append(mainElement.type);
-      console.log('main',main.attr);
-      for ( let[k,v] in mainElement.attr ) {
-        main.attr(k, v);
-      }
-      
-      // main.attr('class', 'targetmineGraphSVG');
-      // main.attr('viewBox', `0 0 ${this._width} ${this._height}`);
-    }
-    // main.append('g')
-    //   .attr('id', 'graph')
-    // ;
+  addToDOM(parent, elements){
+    let self = this;
     
-    // // Add a right-side column for visualization controls
-    // if( columnElements !== undefined ){
-    //   container.append('div')
-    //     .attr('class', 'rightColumn')
-    //   ;
-
-    // // Add individual right column elements
-    // d3.select('.rightColumn').selectAll('div')
-    //   .data(columnElements)
-    //   .enter().append('div')
-    //   .attr('id', d => d.name+'-div')
-    //   .each(function(d) {
-    //     d3.select(this).append('br');
-    //     d3.select(this).append('label')
-    //       .attr('for', d.name+'-table')
-    //       .text(d.text)
-    //     ;
-    //     d3.select(this).append('table')
-    //       .attr('id', d.name+'-table')
-    //       .append('tbody')
-    //       ;
-    //     if( d.button ){
-    //       d3.select(this).append('button')
-    //         .attr('id', d.name+'-add' )
-    //         .text('Add')
-    //       ;
-    //     }
-    //   })
-    //   .exit().remove()
-    // ;
-    // }
-
+    d3.select(`#${parent}`)    
+      .selectAll()
+      .data(elements)
+      .enter()
+      .each(function(d){
+        let head = d3.select(this).append(d.type);
+        
+        if( d.id !== undefined )
+          head.attr('id', d.id);
+        if( d.attributes !== undefined)
+          for(const [k,v] of d.attributes.entries())
+            k === 'text' ? head.text(v) : head.attr(k,v);
+        if( d.style !== undefined )
+          for( const[k,v] of d.style.entries() )
+            head.style(k,v);
+        if( d.on !== undefined )
+          for(const [k,v] of d.on.entries())
+            head.on(k,v);
+        if( d.children !== undefined )
+          self.addToDOM(d.id, d.children)
+          
+      })
+      .exit().remove()
+    ;
   }
-
+  
   /**
    * Initialize the labels of the X axis of the Graph.
    * Initialize a list of the values used as ordinal categories across the X
