@@ -75,10 +75,7 @@ export class BioActivityGraph extends TargetMineGraph{
           ['viewBox', `0 0 ${this._width} ${this._height}`],
         ]),
         children: [
-          { 
-            type: 'g', 
-            id: 'graph' 
-          }  
+          { type: 'g', id: 'graph' }  
         ],
       },
       { 
@@ -196,11 +193,9 @@ export class BioActivityGraph extends TargetMineGraph{
 
     /* 'column' options are fixed */
     self.updateSelectOptions('#modal-column-select', [...new Set(this._data.columns.filter( e => typeof(this._data[0][e]) === 'string'))]);
-    // /* but each time a new column is selected, the options in the 'value' select
-    //  * need to be updated */
-    d3.select('#modal-column-select')//.selectAll('option')
-    //   .on('change', 
-    //   })
+    /* but each time a new column is selected, the options in the 'value' select
+     * need to be updated */
+    d3.select('#modal-column-select')
       .dispatch('change') // make sure to initially update the values
       ;
   }

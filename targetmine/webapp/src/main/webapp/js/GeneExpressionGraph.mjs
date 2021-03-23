@@ -176,13 +176,41 @@ export class GeneExpressionGraph extends TargetMineGraph{
    */
   initDOM(){
     /* init common DOM elements */
-    const mainElements = [
-      { type: 'g', attr: [{ id: 'graph' }] }
+    const elements = [
+      // main visualization area
+      {
+        type: 'svg',
+        id: `canvas_${this._type}`,
+        attributes: new Map([
+          ['class', 'targetmineGraphSVG'],
+          ['viewBox', `0 0 ${this._width} ${this._height}`]
+        ]),
+        children: [
+          { type: 'g', id: 'graph' },
+        ]
+      },
+      // right column controls
+      { 
+        type: 'div',
+        id: `rightColumn_${this._type}`,
+        attributes: new Map([
+          ['class', 'rightColumn'],
+        ]),
+        children:[
+          { 
+            type: 'div', 
+            id: 'visuals-div', 
+            children: [
+              { type: 'br', },
+              { type: 'label', attributes: new Map([ ['text', 'Other Visuals'] ])},
+              { type: 'table', id: 'visuals-table', children: [ {type: 'tbody'}]},
+            ]
+          }
+        ]
+      },
     ];
-    let columnElements = [
-      { 'name': 'visuals', 'text': 'Other Visuals', 'button': false },
-    ];
-    super.initDOM('svg', mainElements, columnElements);
+    
+    super.addToDOM(this._containerId, elements);
   }
 
   /**
