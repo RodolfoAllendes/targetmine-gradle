@@ -59,7 +59,10 @@ export class MultiLayerNetwork{
   addNode(layer, id, attributes){//label, layer){
     /* if the node exits, do not create a new one */
     if( this._layers.hasOwnProperty(layer) && !this._nodes.hasOwnProperty(id) ){
-      this._nodes[id] = attributes;//{ label: label, layer: layer };
+      this._nodes[id] = {
+        layer: layer,
+        attributes: attributes
+      };//{ label: label, layer: layer };
       return true;
     }
     return false;
@@ -96,8 +99,8 @@ export class MultiLayerNetwork{
       elements.push({
         group: 'nodes',
         data:{
-          id: node,//.ncbiGeneId,
-          label: this._nodes[node].label,//.symbol,
+          id: node.id,//.ncbiGeneId,
+          label: node.id, //this._nodes[node].label,//.symbol,
           color: this._layers[layer].color,
           borderColor: this._layers[layer].color,
           shape: this._layers[layer].shape,

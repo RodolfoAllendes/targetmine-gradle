@@ -49,10 +49,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
 
       /* initialize the first layer of the network and display */
       this.loadData(data)//, rootClass);
-      // this.loadData(data, rootClass).then( () => {
-      //   self._cy.add( self._network.getCytoscapeElements() );
-      //   self._cy.layout({name: 'grid'}).run();
-      // });
     });
   }
 
@@ -68,18 +64,19 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     super.loadData(data);
     this._data = this._data.map( d => { return d.ncbiGeneId.toString(); } );
 
-    // fetch initial from the database, using the model 
-    console.log(this._rootClass);
+    // fetch initial from the database, using the model, and add it to the network
     let att = Object.keys(this._model.classes[this._rootClass].attributes);
-    let col = Object.keys(this._model.classes[this._rootClass].collections);
-
     let from = this._rootClass; //'Gene';
     let select = ['ncbiGeneId', 'symbol'];
     let where = [
       { path: this._rootClass, op: "LOOKUP", value: this._data },
     ];
 
-    this.runQuery(from, select, where);
+    // update the add layer select 
+    let col = Object.keys(this._model.classes[this._rootClass].collections);
+    this.updateTargets(col);
+
+    return this.runQuery(from, select, where);
   }
 
   /**
@@ -89,7 +86,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    * current source element
    */
   initDOM(){//targets){
-    
+    let self = this;
     const elements = [
       // main visualization area
       { 
@@ -118,7 +115,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
                 type: 'button',
                 id: 'layer-add',
                 attributes: new Map([ ['text','Add'], ['class', 'modal-button'] ]),
-                on: new Map([ ['click',function(){ console.log('trying to add layer'); }] ]),
+                on: new Map([ ['click', function(){ self.addLayer(); }] ]),
               },
             ]
           },
@@ -199,6 +196,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     super.addToDOM(this._containerId, elements);
     // this.updateTargets(targets);
 
+    /* initialize the properties of the Cytoscape container */
     this._cy = cytoscape({
       container: jQuery('.targetmineGraphCytoscape'),
       style:[
@@ -260,27 +258,8 @@ export class CompositeNetworkGraph extends TargetMineGraph{
         self._network.addNode(from, id, attributes);
       });
 
-    })//.then( () => {
-    //   this._network.addLayer( 'MiRNA', 'DarkKhaki', 'triangle');
-    //   // Once we have the core, we add pre-defined layers to the graph
-    //   let mirnaquery = {
-    //     from: 'Gene',
-    //     select: [
-    //       'ncbiGeneId',
-    //       'miRNAInteractions.miRNA.primaryIdentifier',
-    //       'miRNAInteractions.miRNA.secondaryIdentifier'
-    //     ],
-    //     where:[
-    //       { path: 'Gene', op: "LOOKUP", value: this._data },
-    //       { path: 'miRNAInteractions.supportType', op: '=', value: 'Functional MTI' }
-    //     ]
-    //   };
-    //   return new Promise( resolve => {
-    //     resolve(self._service.rows(mirnaquery))
-    //   }).then( rows => {
-    //     this.addNodesFromResults(rows, 'MiRNA');
-    //     this.addEdgesFromResults(rows);
-    //   });
+    }).then( ()=> { self.plot(); });
+
 
     // }).then( () => {
     //   let hcdpQuery = {
@@ -325,6 +304,31 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     // });
   }
 
+  addLayer(){
+    console.log('calling add layer function');
+        //.then( () => {
+    this._network.addLayer( 'MiRNA', 'DarkKhaki', 'triangle');
+    //   // Once we have the core, we add pre-defined layers to the graph
+    let from = 'Gene';
+    let select = [
+        'ncbiGeneId',
+        'miRNAInteractions.miRNA.primaryIdentifier',
+        'miRNAInteractions.miRNA.secondaryIdentifier'
+      ];
+    let where = [
+        { path: 'Gene', op: "LOOKUP", value: this._data },
+        { path: 'miRNAInteractions.supportType', op: '=', value: 'Functional MTI' }
+      ];
+    
+    return this.runQuery(from, select, where);
+    // return new Promise( resolve => {
+    //   resolve(self._service.rows(mirnaquery))
+    // }).then( rows => {
+    //   this.addNodesFromResults(rows, 'MiRNA');
+    //   this.addEdgesFromResults(rows);
+    // });
+  }
+
   /**
    * Add the nodes that result from the query to the network and the cytoscape
    */
@@ -341,6 +345,16 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     rows.forEach( row => {
       this._network.addEdge(row[0]+'-'+row[1],row[0], row[1]);
     });
+  }
+
+  /**
+   * 
+   */
+  plot(){
+      // this.loadData(data, rootClass).then( () => {
+    this._cy.add( this._network.getCytoscapeElements() );
+    this._cy.layout({name: 'grid'}).run();
+      // });
   }
 
 }
