@@ -22,17 +22,20 @@
       
       /* make sure that all the information required for the visualization 
        * is correctly obtained from the Java code */
-      console.log('Name: ${name}');
-      console.log('Data: ${data}');
-      console.log('Root elements: ${rootClass}');
-      console.log('Collections: ${collections}');
+      // console.log('Name: ${name}');
+      // console.log('Data: ${data}');
+      // console.log('Root elements: ${rootClass}');
+      // console.log('Collections: ${collections}');
 
       window.compositeNetworkGraph = new module.CompositeNetworkGraph(
         '${name}',
         '${data}',
         '<%=containerId%>',
-        width, height
+        width, height,
+        '${rootClass}',
+        '${collections}'
       );
+
     });
 </script>
 </div>

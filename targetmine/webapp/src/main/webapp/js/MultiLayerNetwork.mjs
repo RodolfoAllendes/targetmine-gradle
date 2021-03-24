@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 
 export class MultiLayerNetwork{
 
@@ -56,10 +56,10 @@ export class MultiLayerNetwork{
    * @returns {boolean} true if a new value is added to the list of nodes, false
    * otherwise
    */
-  addNode(id, label, layer){
+  addNode(layer, id, attributes){//label, layer){
     /* if the node exits, do not create a new one */
     if( this._layers.hasOwnProperty(layer) && !this._nodes.hasOwnProperty(id) ){
-      this._nodes[id] = { label: label, layer: layer };
+      this._nodes[id] = attributes;//{ label: label, layer: layer };
       return true;
     }
     return false;
