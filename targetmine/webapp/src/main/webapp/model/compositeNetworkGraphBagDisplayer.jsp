@@ -20,20 +20,14 @@
       let width = 400;
       let height = 400;
       
-      /* make sure that all the information required for the visualization 
-       * is correctly obtained from the Java code */
-      // console.log('Name: ${name}');
-      // console.log('Data: ${data}');
-      // console.log('Root elements: ${rootClass}');
-      // console.log('Collections: ${collections}');
-
+      /* initialize the visualization container */
       window.compositeNetworkGraph = new module.CompositeNetworkGraph(
         '${name}',
         '${data}',
         '<%=containerId%>',
         width, height,
         '${rootClass}',
-        '${collections}'
+        // '${collections}'
       );
 
     });

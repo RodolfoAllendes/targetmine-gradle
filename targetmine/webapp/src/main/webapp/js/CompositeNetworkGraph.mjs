@@ -15,15 +15,16 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    * Constructor
    * @param {string} name The name of the network
    * @param {string} data The ArrayList string representation of the data 
-   * retrieved from the database args[0]
+   * retrieved from the database
    * @param {string} containerId The DOM identifier of the container for the
-   * visualization args[1]
-   * @param {int} width the width of the visualization container args[2]
-   * @param {int} height the height of the visualization container args[3]
+   * visualization
+   * @param {int} width the width of the visualization
+   * @param {int} height the height of the visualization
+   * @param {string} rootClass the class to which the initial elements belong to
    */
   constructor(name, data, containerId, width, height,
-    rootClass,
-    collections){
+    rootClass,){
+    // collections){
     /* initialize super class attributes */
     super('compositeNetwork');
     super.setName(name);
@@ -40,15 +41,18 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     this._rootClass = rootClass.substr(rootClass.lastIndexOf('.')+1);
     this._network.addLayer(this._rootClass, 'LightGray', 'ellipse');
     
-    /* initialize the underlying model */
+    /* retrieve the underlying biological model from the service */
     this._service.fetchModel().then( model => {
+      console.log('fetching the model...');
       this._model = model; 
-
-      /* initialize general DOM elements */
-      this.initDOM(); //collections.substring(1,collections.length-1).split(','));
-
-      /* initialize the first layer of the network and display */
+    /* once we have the model, we load the initial data */
+    }).then( ()=>{
+      console.log('loading initial data...');
       this.loadData(data)//, rootClass);
+    /* finally, we initialize general DOM elements and visualization */
+    // }).then( () => {
+    //   console.log('initializing DOM');
+    //   this.initDOM(); //collections.substring(1,collections.length-1).split(','));
     });
   }
 
@@ -64,19 +68,40 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     super.loadData(data);
     this._data = this._data.map( d => { return d.ncbiGeneId.toString(); } );
 
-    // fetch initial from the database, using the model, and add it to the network
-    let att = Object.keys(this._model.classes[this._rootClass].attributes);
-    let from = this._rootClass; //'Gene';
-    let select = ['ncbiGeneId', 'symbol'];
-    let where = [
-      { path: this._rootClass, op: "LOOKUP", value: this._data },
-    ];
+    let query = new imjs.Query();
+    query.adjustPath(this._rootClass);
+    query.select(['ncbiGeneId', 'symbol']);
 
-    // update the add layer select 
-    let col = Object.keys(this._model.classes[this._rootClass].collections);
-    this.updateTargets(col);
+    console.log(query);
+    
+    this._service.rows(query).then(rows => {
+      console.log('entered then');
+      rows.forEach(row => { 
+        console.log(row);
+        // let id = row[0];
+        // let attributes = {};
+        // select.forEach(function(d,i){
+        //   if(i > 0)
+        //     attributes[d] = row[i];
+        // });
+        // console.log(id, attributes);
+        // self._network.addNode(from, id, attributes);
+      });
+    });
 
-    return this.runQuery(from, select, where);
+    // // fetch initial from the database, using the model, and add it to the network
+    // // let att = Object.keys(this._model.classes[this._rootClass].attributes);
+    // let from = this._rootClass; //'Gene';
+    // let select = ['ncbiGeneId', 'symbol'];
+    // let where = [
+    //   { path: this._rootClass, op: "LOOKUP", value: this._data },
+    // ];
+
+    // // update the add layer select 
+    // let col = Object.keys(this._model.classes[this._rootClass].collections);
+    // this.updateTargets(col);
+
+    // return this.runQuery(from, select, where);
   }
 
   /**
@@ -242,6 +267,9 @@ export class CompositeNetworkGraph extends TargetMineGraph{
       select: select, 
       where: where, 
     };
+
+    // let query = new imjs.Query();
+
     return new Promise( resolve => {
       resolve(self._service.rows(query));
     }).then(rows => {
