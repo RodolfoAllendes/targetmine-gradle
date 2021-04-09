@@ -50,8 +50,8 @@ export class MultiLayerNetwork{
   /**
    * Add a node to the network
    *
-   * @param {string} id
    * @param {string} label
+   * @param {string} id
    * @param {string} layer
    * @returns {boolean} true if a new value is added to the list of nodes, false
    * otherwise

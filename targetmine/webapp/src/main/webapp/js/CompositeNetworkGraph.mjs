@@ -43,11 +43,9 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     
     /* retrieve the underlying biological model from the service */
     this._service.fetchModel().then( model => {
-      console.log('fetching the model...');
       this._model = model; 
-    /* once we have the model, we load the initial data */
+    /* once we have the model, we load the initial data directly from the DB */
     }).then( ()=>{
-      console.log('loading initial data...');
       this.loadData(data)//, rootClass);
     /* finally, we initialize general DOM elements and visualization */
     // }).then( () => {
@@ -65,26 +63,32 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    * for element in the initial bag
    */
   loadData(data){
+    // parse the received array into a simple list of String identifiers
     super.loadData(data);
     this._data = this._data.map( d => { return d.ncbiGeneId.toString(); } );
 
-    let query = new imjs.Query();
-    query.adjustPath(this._rootClass);
-    query.select(['ncbiGeneId', 'symbol']);
+    // for the initial class, retrieve the list of the class' attributes based
+    // on the current model
+    let attributes = Object.keys( this._model.classes[this._rootClass].attributes );
+    let j = attributes.indexOf('primaryIdentifier');
 
-    console.log(query);
-    
+    // use all this information to define an initial query to the database
+    let query = new imjs.Query({model: this._model});
+    query.adjustPath( this._rootClass );
+    query.select( attributes );
+    query.addConstraint({ path: this._rootClass, op: "LOOKUP", value: this._data },)
+
+    // run the query and store the results in the initial layer of the network
     this._service.rows(query).then(rows => {
-      console.log('entered then');
       rows.forEach(row => { 
-        console.log(row);
-        // let id = row[0];
-        // let attributes = {};
-        // select.forEach(function(d,i){
-        //   if(i > 0)
-        //     attributes[d] = row[i];
-        // });
-        // console.log(id, attributes);
+        let node = {};
+        attributes.forEach(function(d,i){
+          // we wont add undefined/null elements,
+          // we dont add the primaryIdentifier nor attributes too long
+          if( row[i] !== undefined && row[i] !== null && i !== j )
+            node[d] = row[i];
+        });
+        console.log('node to add:', row[j], node);
         // self._network.addNode(from, id, attributes);
       });
     });
@@ -106,11 +110,8 @@ export class CompositeNetworkGraph extends TargetMineGraph{
 
   /**
    * Initialize DOM elements
-   * 
-   * @param {} targets These are all the target collections available for the
-   * current source element
    */
-  initDOM(){//targets){
+  initDOM(){
     let self = this;
     const elements = [
       // main visualization area
