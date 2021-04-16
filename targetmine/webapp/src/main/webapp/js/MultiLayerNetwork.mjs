@@ -2,17 +2,15 @@
 
 export class MultiLayerNetwork{
 
-  constructor(type, name){
-    this._type = type;
-    this._name = name;
-
+  constructor(){
+    
     /*
     <layer-name>: {
       color: <string> // css format (default undefined)
       shape: <string> // cytoscape node shape (default undefined)
     }
     */
-    this._layers = {};
+    this._layers = new Map();
 
     /* nodes can be present in any layer so they will be objects
     node ={
@@ -21,7 +19,14 @@ export class MultiLayerNetwork{
       layers: = <string>
     }
     */
-    this._nodes = {};
+    this._nodes = new Map();
+
+    /* To represent the tuples tha associate a specific node with the different
+    layers to which it belongs 
+    node-id = Set(<Layers>)
+    */
+    this._vm = new Map();
+
     /* edges are between pairs of nodes, and can be intra- or inter- layer.
     Notice that the layer for source and target elements must be a valid name
     of layer, and that the source and target id must references valid node id's
@@ -32,37 +37,51 @@ export class MultiLayerNetwork{
       target = {id: <string>, layer: <string>}
     }
     */
-    this._edges = {};
+    this._edges = new Map();
   }
 
   /**
-   *
-   *
+   * Add a layer to the network
+   * 
+   * @param {string} name the name of the layer
+   * @param {string} color
+   * @param {string} shape
+   * @returns {boolean} true/false depending on the layer being added to the 
+   * network
    */
   addLayer(name, color, shape){
-    if( !this._layers.hasOwnProperty(name) ){
-      this._layers[name] = { color: color, shape: shape };
-      return true;
+    //check if the layer already exists
+    if( this._layers.has(name) ){
+      return false;
     }
-    return false;
+    this._layers.set(name, { color: color, shape: shape });
+    return true;
   }
 
   /**
    * Add a node to the network
-   *
-   * @param {string} label
+   * If the node already exists, then its attributes are updated with the
+   * provided values
+   * 
    * @param {string} id
+   * @param {Object} attributes
    * @param {string} layer
    * @returns {boolean} true if a new value is added to the list of nodes, false
    * otherwise
    */
-  addNode(layer, id, attributes){//label, layer){
-    /* if the node exits, do not create a new one */
-    if( this._layers.hasOwnProperty(layer) && !this._nodes.hasOwnProperty(id) ){
-      this._nodes[id] = {
-        layer: layer,
-        attributes: attributes
-      };//{ label: label, layer: layer };
+  addNode(id, layer, attributes){
+    console.log(attributes);
+    this._nodes.set(id, attributes);
+    /* TO-DO make sure the combination node/layer is added correctly */
+    if( !this._vm.has(id) ){
+      this._vm.set(id, new Set([layer]) );
+    }
+  }
+
+  addNodeToLayer(id, layer){
+    // check the node already exist in the network
+    if( this._nodes.has(id) ){
+      this._vm[id].set(layer);
       return true;
     }
     return false;
@@ -71,20 +90,42 @@ export class MultiLayerNetwork{
   /**
    *
    */
-  addEdge(id, source, target){
+  addEdge(id, source, target, attributes){
     // we can only add an edge to the network if the following conditions are met
     // the source node exists
     // the target node exists
     // the edge has not been previously added
-    if( this._nodes.hasOwnProperty(source) && this._nodes.hasOwnProperty(target) && !this._edges.hasOwnProperty(id) ) {
-      this._edges[id] = {
-        source: source,
-        target: target,
-      };
+    if( this._nodes.has(source) && this._nodes.has(target) ){
+      this._edges.set(id, {source: source, target: target, attributes:attributes});
       return true;
     }
     return false;
   }
+
+  /**
+   * 
+   * @returns the layers of the network
+   */
+  getLayers(){
+    return this._layers;
+  }
+
+  /**
+   * 
+   * @returns the Map that contains the nodes of the network
+   */
+  getNodes(){
+    return this._nodes
+  }
+
+  /**
+   * 
+   * @returns the Map that contains the edges of the network
+   */
+  getEdges(){
+    return this._edges;
+  }
+
 
   /**
    *
@@ -119,27 +160,6 @@ export class MultiLayerNetwork{
       });
     }
     return elements;
-  }
-
-  /**
-   *
-   */
-  getLayers(){
-    return this._layers;
-  }
-
-  /**
-   *
-   */
-  getNodes(){
-    return this._nodes;
-  }
-
-  /**
-   *
-   */
-  getEdges(){
-    return this._edges;
   }
 
   /**

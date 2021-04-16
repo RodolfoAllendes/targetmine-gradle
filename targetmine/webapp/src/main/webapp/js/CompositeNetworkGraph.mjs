@@ -84,12 +84,17 @@ export class CompositeNetworkGraph extends TargetMineGraph{
         let node = {};
         attributes.forEach(function(d,i){
           // we wont add undefined/null elements,
-          // we dont add the primaryIdentifier nor attributes too long
-          if( row[i] !== undefined && row[i] !== null && i !== j )
+          // we dont add the primaryIdentifier 
+          // we dont add attributes too long (over 100 chars)
+          if( row[i] !== undefined && row[i] !== null && i !== j && row[i].length < 100 ){
             node[d] = row[i];
+            console.log(d, row[i]);
+          }
+            
         });
         console.log('node to add:', row[j], node);
-        // self._network.addNode(from, id, attributes);
+        console.log(typeof(node));
+        this._network.addNode(row[j], this._rootClass, attributes);
       });
     });
 
