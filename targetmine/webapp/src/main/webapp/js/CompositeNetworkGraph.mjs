@@ -94,7 +94,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
         });
         console.log('node to add:', row[j], node);
         console.log(typeof(node));
-        this._network.addNode(row[j], this._rootClass, attributes);
+        this._network.addNode(row[j], this._rootClass, node);
       });
     });
 
