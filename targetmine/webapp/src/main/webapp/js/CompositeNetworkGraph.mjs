@@ -46,11 +46,16 @@ export class CompositeNetworkGraph extends TargetMineGraph{
       this._model = model; 
     /* once we have the model, we load the initial data directly from the DB */
     }).then( ()=>{
-      this.loadData(data)//, rootClass);
+      this.loadData(data);
     /* finally, we initialize general DOM elements and visualization */
-    // }).then( () => {
-    //   console.log('initializing DOM');
-    //   this.initDOM(); //collections.substring(1,collections.length-1).split(','));
+    }).then( () => {
+      console.log('initializing DOM');
+      this.initDOM(); 
+    }).then( () => {
+      console.log('initialize layers DOM elements');
+      this.updateLayersDOM();
+    }).then( () => {
+      console.log('all finished');
     });
   }
 
@@ -88,12 +93,9 @@ export class CompositeNetworkGraph extends TargetMineGraph{
           // we dont add attributes too long (over 100 chars)
           if( row[i] !== undefined && row[i] !== null && i !== j && row[i].length < 100 ){
             node[d] = row[i];
-            console.log(d, row[i]);
           }
             
         });
-        console.log('node to add:', row[j], node);
-        console.log(typeof(node));
         this._network.addNode(row[j], this._rootClass, node);
       });
     });
@@ -137,115 +139,87 @@ export class CompositeNetworkGraph extends TargetMineGraph{
         children:[
           { 
             type: 'div', 
-            id: 'newLayer-div',
-            attributes: new Map([ ['class', 'flex-table'] ]), 
-            children: [
-              { type: 'label', attributes: new Map([ ['text', 'Add Layer:'] ])},
-              { type: 'select', id: 'networkLayer-select' },
-              { 
-                type: 'button',
-                id: 'layer-add',
-                attributes: new Map([ ['text','Add'], ['class', 'modal-button'] ]),
-                on: new Map([ ['click', function(){ self.addLayer(); }] ]),
-              },
-            ]
-          },
-          { 
-            type: 'div', 
             id: 'layers-div', 
             children: [
-              { type: 'br', },
               { type: 'label', attributes: new Map([ ['text', 'Layers:'] ])},
-              { type: 'table', id: 'layer-table', children: [ {type: 'tbody'}]},
-              { 
-                type: 'button', 
-                id: 'color-add', 
-                attributes: new Map([ ['text', 'Add'] ]),
-                on: new Map([ ['click', function(){ self.modalDisplay('color')}] ]),
-              },
+              { type: 'table', id: 'layer-table' },
             ]
           },
+          // { 
+          //   type: 'div', 
+          //   id: 'newLayer-div',
+          //   attributes: new Map([ ['class', 'flex-table'] ]), 
+          //   children: [
+          //     { type: 'label', attributes: new Map([ ['text', 'Add Layer:'] ])},
+          //     { type: 'select', id: 'networkLayer-select' },
+          //     { 
+          //       type: 'button',
+          //       id: 'layer-add',
+          //       attributes: new Map([ ['text','Add'], ['class', 'modal-button'] ]),
+          //       on: new Map([ ['click', function(){ self.addLayer(); }] ]),
+          //     },
+          //   ]
+          // },
         ]
       },
-      { 
-        type: 'div',
-        id: 'modal',
-        attributes: new Map([ ['class', 'modal'], ]),
-        children:[
-          { 
-            type: 'div',
-            id: 'modal-content',
-            attributes: new Map([ ['class', 'modal-content'], ]),
-            children:[
-              { 
-                type: 'h3',
-                id: 'modal-title',
-                attributes: new Map([ ['class', 'modal-title'], ]),
-              },
-              { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Category:'] ]), },
-              { 
-                type: 'select',
-                id: 'modal-column-select',
-                attributes: new Map([ ['class','modal-item modal-select'] ]),
-                on: new Map([ ['change',function(e){
-                  console.log('estoy aqui');
-                  let values = [...new Set(self._data.map(pa => pa[e.target.value]))];
-                  self.updateSelectOptions('#modal-value-select', values);}] ]),
-              },
-              { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Value:'] ]) },
-              { 
-                type: 'select',
-                id: 'modal-value-select',
-                attributes: new Map([ ['class','modal-item modal-select'], ]),
-              },
-              { 
-                type: 'div', 
-                id: 'modal-input', 
-                attributes: new Map([ ['class','modal-content'], ]),
-                style: new Map([ ['grid-column','span 3'], ]),
-              },
-              { 
-                type: 'button', 
-                id: 'modal-ok', 
-                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'OK'] ]),
-                style: new Map([ ['grid-column', '3'] ]),
-                on: new Map([ ['click', function(){self.modalOK()} ] ]) 
-              },
-              { 
-                type: 'button', 
-                id: 'modal-cancel', 
-                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'Cancel'] ]),
-                style: new Map([ ['grid-column','3'] ]),
-                on: new Map([ ['click',function(){ d3.select('#modal').style('display','none'); }] ]),
-              },
-            ],
-          }
-        ]   
-      }
+      // { 
+      //   type: 'div',
+      //   id: 'modal',
+      //   attributes: new Map([ ['class', 'modal'], ]),
+      //   children:[
+      //     { 
+      //       type: 'div',
+      //       id: 'modal-content',
+      //       attributes: new Map([ ['class', 'modal-content'], ]),
+      //       children:[
+      //         { 
+      //           type: 'h3',
+      //           id: 'modal-title',
+      //           attributes: new Map([ ['class', 'modal-title'], ]),
+      //         },
+      //         { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Category:'] ]), },
+      //         { 
+      //           type: 'select',
+      //           id: 'modal-column-select',
+      //           attributes: new Map([ ['class','modal-item modal-select'] ]),
+      //           on: new Map([ ['change',function(e){
+      //             console.log('estoy aqui');
+      //             let values = [...new Set(self._data.map(pa => pa[e.target.value]))];
+      //             self.updateSelectOptions('#modal-value-select', values);}] ]),
+      //         },
+      //         { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Value:'] ]) },
+      //         { 
+      //           type: 'select',
+      //           id: 'modal-value-select',
+      //           attributes: new Map([ ['class','modal-item modal-select'], ]),
+      //         },
+      //         { 
+      //           type: 'div', 
+      //           id: 'modal-input', 
+      //           attributes: new Map([ ['class','modal-content'], ]),
+      //           style: new Map([ ['grid-column','span 3'], ]),
+      //         },
+      //         { 
+      //           type: 'button', 
+      //           id: 'modal-ok', 
+      //           attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'OK'] ]),
+      //           style: new Map([ ['grid-column', '3'] ]),
+      //           on: new Map([ ['click', function(){self.modalOK()} ] ]) 
+      //         },
+      //         { 
+      //           type: 'button', 
+      //           id: 'modal-cancel', 
+      //           attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'Cancel'] ]),
+      //           style: new Map([ ['grid-column','3'] ]),
+      //           on: new Map([ ['click',function(){ d3.select('#modal').style('display','none'); }] ]),
+      //         },
+      //       ],
+      //     }
+      //   ]   
+      // }
     ];
 
     super.addToDOM(this._containerId, elements);
-    // this.updateTargets(targets);
-
-    /* initialize the properties of the Cytoscape container */
-    this._cy = cytoscape({
-      container: jQuery('.targetmineGraphCytoscape'),
-      style:[
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'shape': 'data(shape)',
-            'background-color': 'data(color)',
-            'border-color': 'data(borderColor)',
-            'border-width': '1px',
-            'display': 'element',
-          }
-        }
-      ],
-    });
   }
 
   /**
@@ -360,6 +334,53 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     // }).then( rows => {
     //   this.addNodesFromResults(rows, 'MiRNA');
     //   this.addEdgesFromResults(rows);
+   
+    // });
+  }
+
+  /**
+   * Given the current layers in the netork, display the appropriate elements
+   * in the corresponding DOM menu element
+   */
+  updateLayersDOM(){
+    console.log(this._network.getLayers());
+    let elements = [];
+    for( let[k,v] of this._network.getLayers() ){
+      console.log(k,v);
+      elements.push({
+        type:'div',
+        id: 'row_'+k,
+        attributes: new Map([ ['class', 'flex-row'] ]),
+        children:[
+          { type: 'svg'},
+          { type: 'div', attributes: new Map([ ['class', 'flex-cell label'], ['text', k] ])},
+          { type: 'span', attributes: new Map([ ['class', 'flex-cell small-close'], ['text', 'x'] ])},
+        ]
+      });
+    }
+    
+      
+    console.log(elements);
+    super.addToDOM('layer-table', elements);
+
+        /* initialize the properties of the Cytoscape container */
+    // this._cy = cytoscape({
+    //   container: jQuery('.targetmineGraphCytoscape'),
+    //   style:[
+    //     {
+    //       selector: 'node',
+    //       style: {
+    //         'label': 'data(label)',
+    //         'text-valign': 'center',
+    //         'text-halign': 'center',
+    //         'shape': 'data(shape)',
+    //         'background-color': 'data(color)',
+    //         'border-color': 'data(borderColor)',
+    //         'border-width': '1px',
+    //         'display': 'element',
+    //       }
+    //     }
+    //   ],
     // });
   }
 

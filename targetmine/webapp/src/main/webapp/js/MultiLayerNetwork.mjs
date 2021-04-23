@@ -70,7 +70,6 @@ export class MultiLayerNetwork{
    * otherwise
    */
   addNode(id, layer, attributes){
-    console.log(attributes);
     this._nodes.set(id, attributes);
     /* TO-DO make sure the combination node/layer is added correctly */
     if( !this._vm.has(id) ){
