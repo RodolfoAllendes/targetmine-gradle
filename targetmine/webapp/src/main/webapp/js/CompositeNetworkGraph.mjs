@@ -42,32 +42,39 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     this._network.addLayer(this._rootClass, 'LightGray', 'ellipse');
     
     /* retrieve the underlying biological model from the service */
-    this._service.fetchModel().then( model => {
-      this._model = model; 
-    /* once we have the model, we load the initial data directly from the DB */
-    }).then( ()=>{
-      this.loadData(data);
-    /* finally, we initialize general DOM elements and visualization */
+    this._service.fetchModel()
+      .then( model => {
+        this._model = model; 
+        /* once we have the model, we load the initial data directly from the DB */
+        return this.loadData(data);
+      })
+      .then( (loadDataValue ) => {
+        /* finally, we initialize general DOM elements and visualization */
+        this.initDOM(); 
     }).then( () => {
-      console.log('initializing DOM');
-      this.initDOM(); 
-    }).then( () => {
-      console.log('initialize layers DOM elements');
+    //   console.log('initialize layers DOM elements');
       this.updateLayersDOM();
     }).then( () => {
-      console.log('all finished');
-    });
+    //   console.log('call to plot the graph');
+      this.plot();
+    // }).then( () => {
+    //   console.log('all finished');
+      });
   }
 
   /**
    * Load initial data for the visualization
    * This initial list of identifiers should be used to define the first layer 
-   * of the multi-layer network
+   * of the multi-layer network.
+   * Notice that, as we need to fetch the information associated to the initial
+   * elements from the DB, the results from this function need to be returned
+   * asynchronously
    *
    * @param {string} data Java ArrayList string representation of the ncbiGeneId
    * for element in the initial bag
+   * @returns the number of elements added to the network
    */
-  loadData(data){
+  async loadData(data){
     // parse the received array into a simple list of String identifiers
     super.loadData(data);
     this._data = this._data.map( d => { return d.ncbiGeneId.toString(); } );
@@ -84,22 +91,21 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     query.addConstraint({ path: this._rootClass, op: "LOOKUP", value: this._data },)
 
     // run the query and store the results in the initial layer of the network
-    this._service.rows(query).then(rows => {
-      rows.forEach(row => { 
-        let node = {};
-        attributes.forEach(function(d,i){
-          // we wont add undefined/null elements,
-          // we dont add the primaryIdentifier 
-          // we dont add attributes too long (over 100 chars)
-          if( row[i] !== undefined && row[i] !== null && i !== j && row[i].length < 100 ){
-            node[d] = row[i];
-          }
-            
-        });
-        this._network.addNode(row[j], this._rootClass, node);
+    const rows = await this._service.rows(query);
+    rows.forEach(row => { 
+      let node = {};
+      attributes.forEach(function(d,i){
+        // we wont add undefined/null elements,
+        // we dont add the primaryIdentifier 
+        // we dont add attributes too long (over 100 chars)
+        if( row[i] !== undefined && row[i] !== null && i !== j && row[i].length < 100 ){
+          node[d] = row[i];
+        }
       });
+      this._network.addNode(row[j], this._rootClass, node);
     });
-
+    return(rows.length);
+    
     // // fetch initial from the database, using the model, and add it to the network
     // // let att = Object.keys(this._model.classes[this._rootClass].attributes);
     // let from = this._rootClass; //'Gene';
@@ -108,7 +114,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     //   { path: this._rootClass, op: "LOOKUP", value: this._data },
     // ];
 
-    // // update the add layer select 
+    // update the add layer select 
     // let col = Object.keys(this._model.classes[this._rootClass].collections);
     // this.updateTargets(col);
 
@@ -340,48 +346,44 @@ export class CompositeNetworkGraph extends TargetMineGraph{
 
   /**
    * Given the current layers in the netork, display the appropriate elements
-   * in the corresponding DOM menu element
+   * in the matching DOM menu element
    */
   updateLayersDOM(){
-    console.log(this._network.getLayers());
     let elements = [];
     for( let[k,v] of this._network.getLayers() ){
-      console.log(k,v);
       elements.push({
         type:'div',
         id: 'row_'+k,
         attributes: new Map([ ['class', 'flex-row'] ]),
         children:[
-          { type: 'svg'},
+          { type: 'svg', attributes: new Map([ ['class', 'display-cell'], ['viewBox', '-5 -5 10 10'] ])},
           { type: 'div', attributes: new Map([ ['class', 'flex-cell label'], ['text', k] ])},
           { type: 'span', attributes: new Map([ ['class', 'flex-cell small-close'], ['text', 'x'] ])},
         ]
       });
     }
     
-      
-    console.log(elements);
     super.addToDOM('layer-table', elements);
 
-        /* initialize the properties of the Cytoscape container */
-    // this._cy = cytoscape({
-    //   container: jQuery('.targetmineGraphCytoscape'),
-    //   style:[
-    //     {
-    //       selector: 'node',
-    //       style: {
-    //         'label': 'data(label)',
-    //         'text-valign': 'center',
-    //         'text-halign': 'center',
-    //         'shape': 'data(shape)',
-    //         'background-color': 'data(color)',
-    //         'border-color': 'data(borderColor)',
-    //         'border-width': '1px',
-    //         'display': 'element',
-    //       }
-    //     }
-    //   ],
-    // });
+    /* initialize the properties of the Cytoscape container */
+    this._cy = cytoscape({
+      container: jQuery('.targetmineGraphCytoscape'),
+      style:[
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'shape': 'data(shape)',
+            'background-color': 'data(color)',
+            'border-color': 'data(borderColor)',
+            'border-width': '1px',
+            'display': 'element',
+          }
+        }
+      ],
+    });
   }
 
   /**
@@ -403,13 +405,14 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   }
 
   /**
-   * 
+   * Plot the elements of the MultiLayer Network
    */
   plot(){
-      // this.loadData(data, rootClass).then( () => {
-    this._cy.add( this._network.getCytoscapeElements() );
+    let eles = this._network.getCytoscapeElements();
+    console.log(eles);
+    this._cy.add( eles );
     this._cy.layout({name: 'grid'}).run();
-      // });
+    
   }
 
 }

@@ -133,31 +133,33 @@ export class MultiLayerNetwork{
    */
   getCytoscapeElements(){
     let elements = [];
+    console.log(this._nodes);
     // add nodes
-    for( let node in this._nodes ){
-      let layer = this._nodes[node].layer;
+    for( let [k,v] of this._nodes ){
+      console.log(k,v);
+      let layer = this._vm.get(k).values().next().value;
       elements.push({
         group: 'nodes',
         data:{
-          id: node.id,//.ncbiGeneId,
-          label: node.id, //this._nodes[node].label,//.symbol,
-          color: this._layers[layer].color,
-          borderColor: this._layers[layer].color,
-          shape: this._layers[layer].shape,
+          id: k,//.ncbiGeneId,
+          label: v.symbol, //this._nodes[node].label,//.symbol,
+          color: this._layers.get(layer).color,
+          borderColor: this._layers.get(layer).color,
+          shape: this._layers.get(layer).shape,
         }
       });
     }
     // add edges
-    for( let edge in this._edges ){
-      elements.push({
-        group: 'edges',
-        data: {
-          id: edge,
-          source: this._edges[edge].source,
-          target: this._edges[edge].target,
-        }
-      });
-    }
+    // for( let edge in this._edges ){
+    //   elements.push({
+    //     group: 'edges',
+    //     data: {
+    //       id: edge,
+    //       source: this._edges[edge].source,
+    //       target: this._edges[edge].target,
+    //     }
+    //   });
+    // }
     return elements;
   }
 
