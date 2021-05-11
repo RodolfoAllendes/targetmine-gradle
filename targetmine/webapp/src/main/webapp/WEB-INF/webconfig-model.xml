@@ -1118,6 +1118,13 @@
                     types="Gene"
     /> -->
 
+    <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetwork3dsGraphBagDisplayer"
+                    jspName="model/compositeNetwork3dsGraphBagDisplayer.jsp"
+                    replacesFields=""
+                    placement="CompositeNetwork"
+                    types="Gene"
+    />
+
   </reportdisplayers>
 
 <!-- widgets -->
