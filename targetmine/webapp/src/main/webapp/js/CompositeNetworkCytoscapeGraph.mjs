@@ -1,17 +1,14 @@
 'use strict';
-import { TargetMineGraph } from "./TargetMineGraph.mjs";
-import { MultiLayerNetwork } from "./MultiLayerNetwork.mjs";
-
-import { CompositeNetworkCytoscapeGraph } from './CompositeNetworkCytoscapeGraph.mjs';
 
 /**
- * @class CompositeNetworkGraph
- * @classdesc
+ * @class CompositeNetworkCytoscapeGraph
+ * @classdesc Utility class used to provide the elements required to display
+ * a MultiLayer Network object using a Cytoscape representation
  * @author Rodolfo Allendes
  * @version 1.0
  */
 
-export class CompositeNetworkGraph extends TargetMineGraph{
+export class CompositeNetworkCytoscapeGraph{
 
   /**
    * Constructor
@@ -35,13 +32,10 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     super.setHeight(height);
 
     /* and class attributes */
-    this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
-    this._network = new MultiLayerNetwork();
-    
+    this._cy = undefined;
+
     /* initialize the root class */
     this._rootClass = rootClass.substr(rootClass.lastIndexOf('.')+1);
-
-    this._visualization = undefined;
     
     /* retrieve the underlying biological model from the service */
     this._service.fetchModel()
@@ -124,87 +118,28 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   }
 
   /**
-   * Initialize DOM elements
+   * Define and return DOM elements
    * Custom DOM elements are added to the visualization in order to handle 
    * display and user interaction. The custom elements are defined first, and
    * then added to the DOM through functionality implemented in the parent
    * class.
    */
-  async initDOM(){
-    let self = this;
+  getVisualizationDOM(){
+    
     const elements = [
       // main visualization area
-      { id: `canvas_${this._type}`, type: 'div', 
+      { 
+        id: `canvas_${this._type}`, type: 'div', 
         attributes: new Map([ ['class', 'targetmineGraphCytoscape'] ])
       },
       // right side controlers
-      { id: `rightColumn_${this._type}`, type: 'div',
-        attributes: new Map([ ['class', 'rightColumn'] ]),
-        children:[
-          { id: 'layers-div', type: 'div', 
-            children: [
-              { id: 'label-layer', type: 'label', attributes: new Map([ ['text', 'Layers:'] ])},
-              { id: 'table-layer', type: 'table' },
-              { id: 'layer-button-add', type: 'button', 
-                attributes: new Map([ ['text', 'Add Elements'] ]),
-                on: new Map([ ['click', function(){ self.modalDisplay('compositeNetworkGraphModal')}] ])
-              }
-            ]
-          },
-        ]
-      },
-      // modal for addition of layers
-      { id: 'compositeNetworkGraphModal', type: 'div',
-        attributes: new Map([ ['class', 'targetmineGraphModal'] ]),
-        children:[
-          { id: 'modal-content', type: 'div',
-            attributes: new Map([ ['class', 'modal-content'], ]),
-            children:[
-              { id: 'modal-title', type: 'h3', attributes: new Map([ ['class', 'modal-title'], ['text','Source:'] ]) },
-              { id: 'modal-label-sourceLayer', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Layer:'] ]) },
-              { id: 'modal-select-sourceLayer', type: 'select', 
-                attributes: new Map([ ['class','modal-item modal-select'] ]),
-                on: new Map([ ['change',function(e){
-                  let opts = self._network.getLayers().get(e.target.value).attributes;
-                  self.modalSelectOptions('modal-select-sourceAttr', opts.sort()); 
-
-                  opts = Object.keys(self._model.classes[e.target.value].collections);
-                  self.modalSelectOptions('modal-select-targetLayer', opts.sort());
-                }] ])
-              },
-              { id: 'modal-label-sourceAttr', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Attribute:'] ]) },
-              { id: 'modal-select-sourceAttr', type: 'select', attributes: new Map([ ['class','modal-item modal-select'] ]) },
-              { id: 'modal-title', type: 'h3', attributes: new Map([ ['class', 'modal-title'], ['text','Target:'] ]) },
-              { id: 'modal-label-targetLayer', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Layer:'] ]) },
-              { id: 'modal-select-targetLayer', type: 'select', 
-                attributes: new Map([ ['class','modal-item modal-select'], ]),
-                on: new Map([ ['change', function(e){
-                  let from = d3.select('#modal-select-sourceLayer').property('value');
-                  let refType = self._model.classes[from].collections[e.target.value].referencedType;
-                  let opts = Object.keys(self._model.classes[refType].fields); 
-                  self.modalSelectOptions('modal-select-targetAttr', opts.sort());
-                }] ]) 
-              },
-              { id: 'modal-label-targetAttr', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Field:'] ]) },
-              { id: 'modal-select-targetAttr', type: 'select', attributes: new Map([ ['class','modal-item modal-select'], ]) },
-              
-              { id: 'modal-ok', type: 'button',  
-                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'OK'] ]),
-                on: new Map([ ['click', self.modalOK.bind(self) ] ]) 
-              },
-              { id: 'modal-cancel', type: 'button', 
-                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'Cancel'] ]),
-                on: new Map([ ['click', function(){ self.modalHide('compositeNetworkGraphModal'); }] ]),
-              },
-            ],
-          }
-        ]   
-      }
+      
+      
+      
     ];
-
-    await super.addToDOM(this._containerId, elements);
-    await this.updateLayersDOM();
-
+  }
+   
+  init(){
     /* initialize the properties of the Cytoscape container */
     this._cy = cytoscape({
       container: jQuery('.targetmineGraphCytoscape'),
@@ -224,16 +159,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
         }
       ],
     });
-  }
-
-  async initVisualization(viz){
-    switch( viz ){
-      case 'cytoscape':
-        this._visualization = new CompositeNetworkCytoscapeGraph();
-        break;
-      default:
-        this._visualization = new CompositeNetworkCytoscapeGraph();
-    }
   }
 
   /**
@@ -399,47 +324,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     }).then( ()=> { self.plot(); });
 
 
-    // }).then( () => {
-    //   let hcdpQuery = {
-    //     from: 'Gene',
-    //     select: [
-    //       'ncbiGeneId',
-    //       'interactions.gene2.ncbiGeneId',
-    //       'interactions.gene2.symbol'
-    //     ],
-    //     where:[
-    //       { path: 'Gene', op: "LOOKUP", value: this._data },
-    //       { path: 'interactions.confidences.type', op: '=', value: 'HCDP' }
-    //     ]
-    //   };
-    //   return new Promise( resolve => {
-    //     resolve(self._service.rows(hcdpQuery))
-    //   }).then( rows => {
-    //     this.addNodesFromResults(rows, 'Gene');
-    //     this.addEdgesFromResults(rows);
-    //   });
-
-    // }).then( () => {
-    //   this._network.addLayer('TranscriptionFactor', 'LightBlue' , 'rectangle');
-    //   let tfQuery = {
-    //   from: 'Gene',
-    //     select: [
-    //       'transcriptionalRegulations.targetGene.ncbiGeneId',
-    //       'ncbiGeneId',
-    //       'symbol'
-    //     ],
-    //     where:[
-    //       { path: 'transcriptionalRegulations.targetGene', op: "LOOKUP", value: this._data },
-    //       { path: 'transcriptionalRegulations.dataSets.name', op: "!=", value: "ENCODE ChIP-seq data" }
-    //     ]
-    //   };
-    //   return new Promise( resolve => {
-    //     resolve(self._service.rows(tfQuery))
-    //   }).then( rows => {
-    //     this.addNodesFromResults(rows, 'TranscriptionFactor');
-    //     this.addEdgesFromResults(rows);
-    //   });
-    // });
   }
 
 
@@ -466,23 +350,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     super.addToDOM('table-layer', elements);
   }
 
-  /**
-   * Add the nodes that result from the query to the network and the cytoscape
-   */
-  addNodesFromResults(rows, layer){
-    rows.forEach(row => {
-      this._network.addNode(row[1], row[2], layer);
-    });
-  }
-
-  /**
-   *
-   */
-  addEdgesFromResults(rows){
-    rows.forEach( row => {
-      this._network.addEdge(row[0]+'-'+row[1],row[0], row[1]);
-    });
-  }
+  
 
   /**
    * Plot the elements of the MultiLayer Network
