@@ -79,14 +79,6 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
             
       /* the class of the root elements */
       request.setAttribute("rootClass", model.getQualifiedTypeName(reportObject.getType()));
-
-      /* and the collections linked by these elements */
-      ClassDescriptor cld = reportObject.getClassDescriptor();
-      ArrayList<String> collectionDescriptors = new ArrayList<String>();
-      for( CollectionDescriptor coldes: cld.getCollectionDescriptors() ){
-        collectionDescriptors.add(coldes.getReferencedClassDescriptor().getName());
-      }
-      request.setAttribute("collections", collectionDescriptors);
     }
     catch(IllegalAccessException | ClassNotFoundException e){
       logger.error(e.getMessage());
@@ -125,15 +117,6 @@ public class CompositeNetworkGraphBagDisplayer extends BagDisplayer{
       
       /* the class of the root elements */
       request.setAttribute("rootClass", model.getQualifiedTypeName(reportBag.getType()));
-
-      /* and the collections linked by these elements
-        --- this is actually I probably dont need ---- */
-      // ClassDescriptor cld = model.getClassDescriptorByName(reportBag.getType());
-      // ArrayList<String> collectionDescriptors = new ArrayList<String>();
-      // for( CollectionDescriptor coldes: cld.getCollectionDescriptors() ){
-      //   collectionDescriptors.add(coldes.getReferencedClassDescriptor().getName());
-      // }
-      // request.setAttribute("collections", collectionDescriptors);
     } //try
     catch(Exception e){
       logger.error(e.getMessage());

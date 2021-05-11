@@ -31,15 +31,14 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     super.setContainerId(containerId);
     super.setWidth(width);
     super.setHeight(height);
-    
+
     /* and class attributes */
     this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
     this._network = new MultiLayerNetwork();
     this._cy = undefined;
 
-    /* initialize the root class and its corresponding layer */
+    /* initialize the root class */
     this._rootClass = rootClass.substr(rootClass.lastIndexOf('.')+1);
-    this._network.addLayer(this._rootClass, 'LightGray', 'ellipse');
     
     /* retrieve the underlying biological model from the service */
     this._service.fetchModel()
@@ -49,16 +48,16 @@ export class CompositeNetworkGraph extends TargetMineGraph{
         return this.loadData(data);
       })
       .then( (loadDataValue ) => {
-        /* finally, we initialize general DOM elements and visualization */
-        this.initDOM(); 
-    }).then( () => {
-    //   console.log('initialize layers DOM elements');
-      this.updateLayersDOM();
-    }).then( () => {
-    //   console.log('call to plot the graph');
-      this.plot();
-    // }).then( () => {
-    //   console.log('all finished');
+        // Once the initial data has been loaded, it is possible to initialize 
+        // general, static DOM elements
+        return this.initDOM(); 
+      }).then( () => {
+        // and dynamic DOM elements (this will also change as result of user
+        // interaction
+      //   return this.updateLayersDOM();
+      // }).then( () => {  
+        // finally, we plot the network
+        this.plot();
       });
   }
 
@@ -77,168 +76,280 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   async loadData(data){
     // parse the received array into a simple list of String identifiers
     super.loadData(data);
-    this._data = this._data.map( d => { return d.ncbiGeneId.toString(); } );
-
+    
+    // retrieve the data identifier 
+    let ident = this._data['columns'][0];
+    this._data = this._data.map( d => { return d[ident].toString(); } );
+    
     // for the initial class, retrieve the list of the class' attributes based
     // on the current model
     let attributes = Object.keys( this._model.classes[this._rootClass].attributes );
-    let j = attributes.indexOf('primaryIdentifier');
-
+    let id_idx = attributes.indexOf('id');
+    
     // use all this information to define an initial query to the database
     let query = new imjs.Query({model: this._model});
     query.adjustPath( this._rootClass );
     query.select( attributes );
     query.addConstraint({ path: this._rootClass, op: "LOOKUP", value: this._data },)
-
+    console.log(query);
+    
     // run the query and store the results in the initial layer of the network
     const rows = await this._service.rows(query);
+    // we will assume all rows have the same attributes, and use the first one
+    // to filter out undefined/null elements and attributes that are too long
+    let attr_idx = [];
+    attributes = attributes.filter(function(d,i){
+      let item = rows[0][i];
+      if( item !== undefined && item !== null && i !== id_idx && (typeof(item) === 'number' || item.length < 100) ){
+        attr_idx.push(i);
+        return true;
+      }
+      return false;
+    });
+
+    // initialize the layer for the initial class, using the retrieved
+    // attributes and default visual cues
+    this._network.addLayer(this._rootClass, attributes, 'LightGray', 'ellipse');
+
+    // and the nodes in the initial layer
     rows.forEach(row => { 
       let node = {};
-      attributes.forEach(function(d,i){
-        // we wont add undefined/null elements,
-        // we dont add the primaryIdentifier 
-        // we dont add attributes too long (over 100 chars)
-        if( row[i] !== undefined && row[i] !== null && i !== j && row[i].length < 100 ){
-          node[d] = row[i];
-        }
-      });
-      this._network.addNode(row[j], this._rootClass, node);
+      attributes.forEach( (d,i) => node[d] = row[attr_idx[i]] )
+      this._network.addNode(row[id_idx], this._rootClass, node);
     });
     return(rows.length);
-    
-    // // fetch initial from the database, using the model, and add it to the network
-    // // let att = Object.keys(this._model.classes[this._rootClass].attributes);
-    // let from = this._rootClass; //'Gene';
-    // let select = ['ncbiGeneId', 'symbol'];
-    // let where = [
-    //   { path: this._rootClass, op: "LOOKUP", value: this._data },
-    // ];
-
-    // update the add layer select 
-    // let col = Object.keys(this._model.classes[this._rootClass].collections);
-    // this.updateTargets(col);
-
-    // return this.runQuery(from, select, where);
   }
 
   /**
    * Initialize DOM elements
+   * Custom DOM elements are added to the visualization in order to handle 
+   * display and user interaction. The custom elements are defined first, and
+   * then added to the DOM through functionality implemented in the parent
+   * class.
    */
-  initDOM(){
+  async initDOM(){
     let self = this;
     const elements = [
       // main visualization area
-      { 
-        type: 'div',
-        id: `canvas_${this._type}`,
-        attributes: new Map([
-          ['class', 'targetmineGraphCytoscape']
-        ])
+      { id: `canvas_${this._type}`, type: 'div', 
+        attributes: new Map([ ['class', 'targetmineGraphCytoscape'] ])
       },
       // right side controlers
-      { 
-        type: 'div',
-        id: `rightColumn_${this._type}`,
-        attributes: new Map([
-          ['class', 'rightColumn'],
-        ]),
+      { id: `rightColumn_${this._type}`, type: 'div',
+        attributes: new Map([ ['class', 'rightColumn'] ]),
         children:[
-          { 
-            type: 'div', 
-            id: 'layers-div', 
+          { id: 'layers-div', type: 'div', 
             children: [
-              { type: 'label', attributes: new Map([ ['text', 'Layers:'] ])},
-              { type: 'table', id: 'layer-table' },
+              { id: 'label-layer', type: 'label', attributes: new Map([ ['text', 'Layers:'] ])},
+              { id: 'table-layer', type: 'table' },
+              { id: 'layer-button-add', type: 'button', 
+                attributes: new Map([ ['text', 'Add Elements'] ]),
+                on: new Map([ ['click', function(){ self.modalDisplay('compositeNetworkGraphModal')}] ])
+              }
             ]
           },
-          // { 
-          //   type: 'div', 
-          //   id: 'newLayer-div',
-          //   attributes: new Map([ ['class', 'flex-table'] ]), 
-          //   children: [
-          //     { type: 'label', attributes: new Map([ ['text', 'Add Layer:'] ])},
-          //     { type: 'select', id: 'networkLayer-select' },
-          //     { 
-          //       type: 'button',
-          //       id: 'layer-add',
-          //       attributes: new Map([ ['text','Add'], ['class', 'modal-button'] ]),
-          //       on: new Map([ ['click', function(){ self.addLayer(); }] ]),
-          //     },
-          //   ]
-          // },
         ]
       },
-      // { 
-      //   type: 'div',
-      //   id: 'modal',
-      //   attributes: new Map([ ['class', 'modal'], ]),
-      //   children:[
-      //     { 
-      //       type: 'div',
-      //       id: 'modal-content',
-      //       attributes: new Map([ ['class', 'modal-content'], ]),
-      //       children:[
-      //         { 
-      //           type: 'h3',
-      //           id: 'modal-title',
-      //           attributes: new Map([ ['class', 'modal-title'], ]),
-      //         },
-      //         { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Category:'] ]), },
-      //         { 
-      //           type: 'select',
-      //           id: 'modal-column-select',
-      //           attributes: new Map([ ['class','modal-item modal-select'] ]),
-      //           on: new Map([ ['change',function(e){
-      //             console.log('estoy aqui');
-      //             let values = [...new Set(self._data.map(pa => pa[e.target.value]))];
-      //             self.updateSelectOptions('#modal-value-select', values);}] ]),
-      //         },
-      //         { type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Value:'] ]) },
-      //         { 
-      //           type: 'select',
-      //           id: 'modal-value-select',
-      //           attributes: new Map([ ['class','modal-item modal-select'], ]),
-      //         },
-      //         { 
-      //           type: 'div', 
-      //           id: 'modal-input', 
-      //           attributes: new Map([ ['class','modal-content'], ]),
-      //           style: new Map([ ['grid-column','span 3'], ]),
-      //         },
-      //         { 
-      //           type: 'button', 
-      //           id: 'modal-ok', 
-      //           attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'OK'] ]),
-      //           style: new Map([ ['grid-column', '3'] ]),
-      //           on: new Map([ ['click', function(){self.modalOK()} ] ]) 
-      //         },
-      //         { 
-      //           type: 'button', 
-      //           id: 'modal-cancel', 
-      //           attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'Cancel'] ]),
-      //           style: new Map([ ['grid-column','3'] ]),
-      //           on: new Map([ ['click',function(){ d3.select('#modal').style('display','none'); }] ]),
-      //         },
-      //       ],
-      //     }
-      //   ]   
-      // }
+      // modal for addition of layers
+      { id: 'compositeNetworkGraphModal', type: 'div',
+        attributes: new Map([ ['class', 'targetmineGraphModal'] ]),
+        children:[
+          { id: 'modal-content', type: 'div',
+            attributes: new Map([ ['class', 'modal-content'], ]),
+            children:[
+              { id: 'modal-title', type: 'h3', attributes: new Map([ ['class', 'modal-title'], ['text','Source:'] ]) },
+              { id: 'modal-label-sourceLayer', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Layer:'] ]) },
+              { id: 'modal-select-sourceLayer', type: 'select', 
+                attributes: new Map([ ['class','modal-item modal-select'] ]),
+                on: new Map([ ['change',function(e){
+                  let opts = self._network.getLayers().get(e.target.value).attributes;
+                  self.modalSelectOptions('modal-select-sourceAttr', opts.sort()); 
+
+                  opts = Object.keys(self._model.classes[e.target.value].collections);
+                  self.modalSelectOptions('modal-select-targetLayer', opts.sort());
+                }] ])
+              },
+              { id: 'modal-label-sourceAttr', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Attribute:'] ]) },
+              { id: 'modal-select-sourceAttr', type: 'select', attributes: new Map([ ['class','modal-item modal-select'] ]) },
+              { id: 'modal-title', type: 'h3', attributes: new Map([ ['class', 'modal-title'], ['text','Target:'] ]) },
+              { id: 'modal-label-targetLayer', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Layer:'] ]) },
+              { id: 'modal-select-targetLayer', type: 'select', 
+                attributes: new Map([ ['class','modal-item modal-select'], ]),
+                on: new Map([ ['change', function(e){
+                  let from = d3.select('#modal-select-sourceLayer').property('value');
+                  let refType = self._model.classes[from].collections[e.target.value].referencedType;
+                  let opts = Object.keys(self._model.classes[refType].fields); 
+                  self.modalSelectOptions('modal-select-targetAttr', opts.sort());
+                }] ]) 
+              },
+              { id: 'modal-label-targetAttr', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Field:'] ]) },
+              { id: 'modal-select-targetAttr', type: 'select', attributes: new Map([ ['class','modal-item modal-select'], ]) },
+              
+              { id: 'modal-ok', type: 'button',  
+                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'OK'] ]),
+                on: new Map([ ['click', self.modalOK.bind(self) ] ]) 
+              },
+              { id: 'modal-cancel', type: 'button', 
+                attributes: new Map([ ['class', 'modal-item modal-button'], ['text', 'Cancel'] ]),
+                on: new Map([ ['click', function(){ self.modalHide('compositeNetworkGraphModal'); }] ]),
+              },
+            ],
+          }
+        ]   
+      }
     ];
 
-    super.addToDOM(this._containerId, elements);
+    await super.addToDOM(this._containerId, elements);
+    await this.updateLayersDOM();
+
+    /* initialize the properties of the Cytoscape container */
+    this._cy = cytoscape({
+      container: jQuery('.targetmineGraphCytoscape'),
+      style:[
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'shape': 'data(shape)',
+            'background-color': 'data(color)',
+            'border-color': 'data(borderColor)',
+            'border-width': '1px',
+            'display': 'element',
+          }
+        }
+      ],
+    });
   }
 
   /**
    * 
-   * @param targets 
+   * @param {string} modalId 
+   */  
+  async modalDisplay(modalId){
+    // display the modal 
+    let modal = d3.select(`#${modalId}`)
+      .style('display', 'flex')
+    ;
+    // load the options in the source select element
+    let options = [... this._network.getLayers().keys() ];
+    await this.modalSelectOptions('modal-select-sourceLayer', options.sort());
+    d3.select('#modal-select-sourceLayer').dispatch('change');
+  }
+
+  /**
+   * 
+   * @param {string} modalId 
    */
-  updateTargets(targets){
-    d3.select('#networkLayer-select').selectAll('option').remove();
-    d3.select('#networkLayer-select').selectAll('option')
-      .data(targets)
+  modalHide(modalId){
+    let modal = d3.select(`#${modalId}`)
+      .style('display', 'none')
+    ;
+  }
+
+  /**
+   * 
+   * @returns 
+   */
+  async modalOK(){
+    // from
+    let sourceClass = d3.select('#modal-select-sourceLayer').property('value');
+    let collection = d3.select('#modal-select-targetLayer').property('value');
+    let sourceAttr = d3.select('#modal-select-sourceAttr').property('value');
+    let collectionAttr = d3.select('#modal-select-targetAttr').property('value');
+    
+    // edge class is the class associated with the interaction type
+    let edgeClass = this._model.classes[sourceClass].collections[collection].referencedType;
+    // target class is the class to which target elements belong to 
+    let targetClass = this._model.classes[edgeClass].fields[collectionAttr].referencedType;
+    
+    // we need to retrieve from the database the selected identifier for the 
+    // source class, plus all the attributes associated to the target class,
+    // for this, we define an array of 'fields' to be retrieved
+    let fields = [ sourceAttr ];
+    Object.keys(this._model.classes[targetClass].attributes).forEach(d =>{
+      fields.push(`${collection}.${collectionAttr}.${d}`);
+    });
+    
+    // finally, we need to add constrains to the query
+    // in particular, we will only look for results where the source is already 
+    // included in the network
+    let values = this._network.getNodesByLayer(sourceClass);
+    let data = [];
+    let ids = []
+    values.forEach( (v,k) => {
+      data.push( v[sourceAttr].toString() );
+      ids.push( k );
+    });
+
+    let query = new imjs.Query({model: this._model});
+    query.adjustPath( sourceClass );
+    query.select( fields );
+    query.addConstraint({ path: sourceClass, op: "LOOKUP", value: data },)
+    
+    // run the query and store the results in the initial layer of the network
+    const rows = await this._service.rows(query);
+    console.log(rows);
+  
+    // Now we need to save the results in the network. For this, we will assume 
+    // all rows have the same attributes, and use the first one
+    // to filter out undefined/null elements and attributes that are too long
+    let attr_idx = [];
+    let attributes = Object.keys(this._model.classes[targetClass].attributes);
+    let id_idx = attributes.indexOf('id');
+    attributes = attributes.filter(function(d,i){
+      // since each row has one element more than the attributes in the target class
+      // we shift to the right one position
+      let item = rows[0][i+1];
+      if( item !== undefined && item !== null && i !== id_idx && (typeof(item) === 'number' || item.length < 100) ){
+        attr_idx.push(i+1);
+        return true;
+      }
+      return false;
+    });
+    
+    // add a new layer if required
+    if( !this._network.hasLayer(targetClass) )
+      this._network.addLayer(targetClass, attributes, `#${Math.floor(Math.random()*16777215).toString(16)}`, 'ellipse');
+
+    // process the results from the query
+    rows.forEach(row => { 
+      // and add the nodes to the network in the corresponding layer  
+      let node = {};
+      attributes.forEach( (d,i) => node[d] = row[attr_idx[i]] )
+      this._network.addNode(row[id_idx+1], targetClass, node);
+      // and the edges
+      let edge = {};
+      let sourceID = ids[data.indexOf(row[0])];
+      console.log(sourceID);
+      this._network.addEdge(`${sourceID}-${row[id_idx+1]}`,sourceID,row[id_idx+1],edge);
+    });
+      
+    let modal = d3.select('#compositeNetworkGraphModal')
+      .style('display', 'none')
+    ;
+
+    this.plot();
+  }
+
+
+  /**
+   * 
+   * @param selectId 
+   * @param sourceClass 
+   */
+  async modalSelectOptions(selectId, sourceClasses){
+    console.log(`updating select ${selectId}`);
+    // remove all previous options
+    d3.select(`#${selectId}`).selectAll('option').remove();
+    d3.select(`#${selectId}`).selectAll('option')
+      .data(sourceClasses)
       .enter().append('option')
-        .attr('value', d => d)
-        .text(d => d.substr(d.lastIndexOf('.')+1))
+        .attr('value', function(d){ return d; })
+        .text(function(d){ return d; })
+    ;
+
   }
 
   /**
@@ -318,37 +429,13 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     // });
   }
 
-  addLayer(){
-    console.log('calling add layer function');
-        //.then( () => {
-    this._network.addLayer( 'MiRNA', 'DarkKhaki', 'triangle');
-    //   // Once we have the core, we add pre-defined layers to the graph
-    let from = 'Gene';
-    let select = [
-        'ncbiGeneId',
-        'miRNAInteractions.miRNA.primaryIdentifier',
-        'miRNAInteractions.miRNA.secondaryIdentifier'
-      ];
-    let where = [
-        { path: 'Gene', op: "LOOKUP", value: this._data },
-        { path: 'miRNAInteractions.supportType', op: '=', value: 'Functional MTI' }
-      ];
-    
-    return this.runQuery(from, select, where);
-    // return new Promise( resolve => {
-    //   resolve(self._service.rows(mirnaquery))
-    // }).then( rows => {
-    //   this.addNodesFromResults(rows, 'MiRNA');
-    //   this.addEdgesFromResults(rows);
-   
-    // });
-  }
+
 
   /**
    * Given the current layers in the netork, display the appropriate elements
    * in the matching DOM menu element
    */
-  updateLayersDOM(){
+  async updateLayersDOM(){
     let elements = [];
     for( let[k,v] of this._network.getLayers() ){
       elements.push({
@@ -363,27 +450,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
       });
     }
     
-    super.addToDOM('layer-table', elements);
-
-    /* initialize the properties of the Cytoscape container */
-    this._cy = cytoscape({
-      container: jQuery('.targetmineGraphCytoscape'),
-      style:[
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'shape': 'data(shape)',
-            'background-color': 'data(color)',
-            'border-color': 'data(borderColor)',
-            'border-width': '1px',
-            'display': 'element',
-          }
-        }
-      ],
-    });
+    super.addToDOM('table-layer', elements);
   }
 
   /**
@@ -409,9 +476,8 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    */
   plot(){
     let eles = this._network.getCytoscapeElements();
-    console.log(eles);
     this._cy.add( eles );
-    this._cy.layout({name: 'grid'}).run();
+    this._cy.layout({name: 'cose'}).run();
     
   }
 

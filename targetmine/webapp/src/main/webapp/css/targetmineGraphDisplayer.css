@@ -72,7 +72,7 @@ path.violin{
 }
 
 /* Definitions for Modal components */
-div.modal {
+div.targetmineGraphModal {
   display: none; /* Hidden by default */
   flex-direction: column;
   position: absolute; /* Stay in place */

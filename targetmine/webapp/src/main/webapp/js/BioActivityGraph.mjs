@@ -147,7 +147,6 @@ export class BioActivityGraph extends TargetMineGraph{
                 id: 'modal-column-select',
                 attributes: new Map([ ['class','modal-item modal-select'] ]),
                 on: new Map([ ['change',function(e){
-                  console.log('estoy aqui');
                   let values = [...new Set(self._data.map(pa => pa[e.target.value]))];
                   self.updateSelectOptions('#modal-value-select', values);}] ]),
               },

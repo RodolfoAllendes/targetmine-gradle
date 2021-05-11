@@ -27,7 +27,6 @@
         '<%=containerId%>',
         width, height,
         '${rootClass}',
-        // '${collections}'
       );
 
     });

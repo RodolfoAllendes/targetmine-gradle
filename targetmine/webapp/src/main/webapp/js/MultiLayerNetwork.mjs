@@ -44,17 +44,18 @@ export class MultiLayerNetwork{
    * Add a layer to the network
    * 
    * @param {string} name the name of the layer
+   * @param {Array} attributes
    * @param {string} color
    * @param {string} shape
    * @returns {boolean} true/false depending on the layer being added to the 
    * network
    */
-  addLayer(name, color, shape){
+  addLayer(name, attributes, color, shape){
     //check if the layer already exists
     if( this._layers.has(name) ){
       return false;
     }
-    this._layers.set(name, { color: color, shape: shape });
+    this._layers.set(name, { attributes: attributes, color: color, shape: shape });
     return true;
   }
 
@@ -117,6 +118,16 @@ export class MultiLayerNetwork{
     return this._nodes
   }
 
+  getNodesByLayer(layer){
+    let m = new Map();
+    this._nodes.forEach( (v,k) => {
+      if (this._vm.get(k).has(layer)){
+        m.set(k,v);
+      } 
+    });
+    return m;
+  }
+
   /**
    * 
    * @returns the Map that contains the edges of the network
@@ -150,17 +161,26 @@ export class MultiLayerNetwork{
       });
     }
     // add edges
-    // for( let edge in this._edges ){
-    //   elements.push({
-    //     group: 'edges',
-    //     data: {
-    //       id: edge,
-    //       source: this._edges[edge].source,
-    //       target: this._edges[edge].target,
-    //     }
-    //   });
-    // }
+    for( let [k,v] of this._edges ){
+      elements.push({
+        group: 'edges',
+        data: {
+          id: k,
+          source: v.source,
+          target: v.target,
+        }
+      });
+    }
     return elements;
+  }
+
+  /**
+   * 
+   * @param layer 
+   * @returns 
+   */
+  hasLayer(layer){
+    return this._layers.has(layer);
   }
 
   /**
