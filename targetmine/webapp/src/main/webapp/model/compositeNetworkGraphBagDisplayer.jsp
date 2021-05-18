@@ -12,6 +12,19 @@
 <!-- Visualization Container -->
 <div id=<%=containerId%> class='targetmineGraphDisplayer'></div>
 
+<!-- <script>
+  oldCy = cytoscape;
+  window.cytoscape = null;
+</script>
+<script type="text/javascript" src="cytoscape-1.18.0.min.js"></script>
+<script>
+  window.newcy = cytoscape;
+  window.cytoscape = oldCy;
+  // test it worked
+  console.log('old', window.cytoscape.version);
+  console.log('new', window.newcy.version);
+</script> -->
+
 <!-- Visualization Definition -->
 <script type="text/javascript">
   import(window.location.origin+'/targetmine/js/CompositeNetworkGraph.mjs')

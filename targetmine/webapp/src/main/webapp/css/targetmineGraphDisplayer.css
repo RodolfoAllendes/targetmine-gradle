@@ -40,7 +40,7 @@ div.flex-table{
   box-sizing: border-box;
   flex-direction: column;
 }
-div.flex-row{
+.flex-row div, .flex-row select, .flex-row label{
   display: flex;
   box-sizing: border-box;
   flex-direction: row;

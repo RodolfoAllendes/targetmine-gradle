@@ -138,43 +138,6 @@ export class MultiLayerNetwork{
 
 
   /**
-   *
-   * @returns {array} the complete set of nodes and edges currently in the
-   * network, as an array of objects suitable for cytoscape
-   */
-  getCytoscapeElements(){
-    let elements = [];
-    console.log(this._nodes);
-    // add nodes
-    for( let [k,v] of this._nodes ){
-      console.log(k,v);
-      let layer = this._vm.get(k).values().next().value;
-      elements.push({
-        group: 'nodes',
-        data:{
-          id: k,//.ncbiGeneId,
-          label: v.symbol, //this._nodes[node].label,//.symbol,
-          color: this._layers.get(layer).color,
-          borderColor: this._layers.get(layer).color,
-          shape: this._layers.get(layer).shape,
-        }
-      });
-    }
-    // add edges
-    for( let [k,v] of this._edges ){
-      elements.push({
-        group: 'edges',
-        data: {
-          id: k,
-          source: v.source,
-          target: v.target,
-        }
-      });
-    }
-    return elements;
-  }
-
-  /**
    * 
    * @param layer 
    * @returns 

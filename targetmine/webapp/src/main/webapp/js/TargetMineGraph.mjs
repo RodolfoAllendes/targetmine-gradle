@@ -115,7 +115,7 @@ export class TargetMineGraph {
    * @param {Object} elements When provided, it lists DOM elements that
    * should be appended to the main visualization panel
    */
-  addToDOM(parent, elements){
+  async addToDOM(parent, elements){
     let self = this;
     
     d3.select(`#${parent}`)    
@@ -123,7 +123,9 @@ export class TargetMineGraph {
       .data(elements)
       .enter()
       .each(function(d){
-        let head = d3.select(this).append(d.type);
+        
+        // insert the element at the give position (if specified)
+        let head = (d.position !== undefined) ? d3.select(this).insert(d.type, d.position) : d3.select(this).insert(d.type);
         
         if( d.id !== undefined )
           head.attr('id', d.id);
