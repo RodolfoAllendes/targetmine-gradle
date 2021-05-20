@@ -17,7 +17,6 @@ import org.apache.logging.log4j.LogManager;
 import org.intermine.metadata.ConstraintOp;
 import org.intermine.metadata.Model;
 import org.intermine.model.InterMineObject;
-import org.intermine.model.bio.Organism;
 import org.intermine.objectstore.ObjectStore;
 import org.intermine.objectstore.ObjectStoreException;
 import org.intermine.objectstore.ObjectStoreWriter;
@@ -49,7 +48,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 
 	private Map<String, InterMineObject> organismMap = new HashMap<String, InterMineObject>();
 
-	public CalculateBioThemeBackground(ObjectStoreWriter osw) {
+	public CalculateBioThemeBackground(ObjectStoreWriter osw) throws Exception {
 		super(osw);
 		model = Model.getInstanceByName("genomic");
 
@@ -72,10 +71,11 @@ public class CalculateBioThemeBackground extends PostProcessor {
 	/**
 	 * 
 	 * @param taxonIds
+	 * @throws IllegalAccessException 
 	 */
-	private void getOrganism(Collection<String> taxonIds) {
+	private void getOrganism(Collection<String> taxonIds) throws IllegalAccessException {
 		Query q = new Query();
-		QueryClass qcOrganism = new QueryClass(Organism.class);
+		QueryClass qcOrganism = new QueryClass(model.getClassDescriptorByName("Organism").getType());
 		QueryField qfTaxonId = new QueryField(qcOrganism, "taxonId");
 
 		q.addFrom(qcOrganism);
@@ -89,8 +89,9 @@ public class CalculateBioThemeBackground extends PostProcessor {
 		Iterator<?> iterator = results.iterator();
 		while (iterator.hasNext()) {
 			ResultsRow<?> result = (ResultsRow<?>) iterator.next();
-			Organism organism = (Organism) result.get(0);
-			organismMap.put(organism.getTaxonId(), organism);
+			InterMineObject organism = (InterMineObject) result.get(0);
+			String taxonId = (String) organism.getFieldValue("taxonId");
+			organismMap.put(taxonId, organism);
 		}
 
 	}
@@ -218,7 +219,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' "
 				+ " and got.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.qualifier is null "
+				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.isnegation = false "
 				+ " group by got.namespace ";
 
 		return sql;
@@ -237,7 +238,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " where org.taxonId = '" + taxonId + "' " 
 				+ " and pgot.namespace = '" + namespace + "' "
 				+ " and pgot.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ " and goa.qualifier is null " + (withIEA ? "" : " and goec.code <> 'IEA' ")
+				+ " and goa.isnegation = false " + (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " group by pgot.identifier ";
 
 		return sqlQuery;
@@ -256,7 +257,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join goterm as got on got.id = goa.ontologytermid "
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' " 
-				+ " and goa.qualifier is null  "
+				+ " and goa.isnegation = false  "
 				+ (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " ) and pgot.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
 				+ " group by pgot.namespace ";
@@ -570,7 +571,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' "
 				+ " and gost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.qualifier is null "
+				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.isnegation = false "
 				+ " group by gost.namespace ";
 
 		return sql;
@@ -590,7 +591,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " where org.taxonId = '" + taxonId + "' " 
 				+ " and pgost.namespace = '" + namespace + "' "
 				+ " and pgost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ " and goa.qualifier is null " + (withIEA ? "" : " and goec.code <> 'IEA' ")
+				+ " and goa.isnegation = false " + (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " group by pgost.identifier ";
 
 		return sqlQuery;
@@ -610,7 +611,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join goslimterm as gost on gost.id = gogos.goslimterms "
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' " 
-				+ " and goa.qualifier is null "
+				+ " and goa.isnegation = false "
 				+ (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " ) and pgost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
 				+ " group by pgost.namespace ";
@@ -838,7 +839,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' "
 				+ " and got.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.qualifier is null "
+				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.isnegation = false "
 				+ " group by got.namespace ";
 
 		return sql;
@@ -859,7 +860,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " where org.taxonId = '" + taxonId + "' " 
 				+ " and pgot.namespace = '" + namespace + "' "
 				+ " and pgot.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ " and goa.qualifier is null " + (withIEA ? "" : " and goec.code <> 'IEA' ")
+				+ " and goa.isnegation = false " + (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " group by pgot.identifier ";
 
 		return sqlQuery;
@@ -1085,7 +1086,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' "
 				+ " and got.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.qualifier is null "
+				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.isnegation = false "
 				+ " group by got.namespace ";
 
 		return sql;
@@ -1106,7 +1107,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " where org.taxonId = '" + taxonId + "' " 
 				+ " and pgot.namespace = '" + namespace + "' "
 				+ " and pgot.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ " and goa.qualifier is null " + (withIEA ? "" : " and goec.code <> 'IEA' ")
+				+ " and goa.isnegation = false " + (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " group by pgot.identifier ";
 
 		return sqlQuery;
@@ -1237,7 +1238,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' "
 				+ " and gost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.qualifier is null "
+				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.isnegation = false "
 				+ " group by gost.namespace ";
 
 		return sql;
@@ -1259,7 +1260,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " where org.taxonId = '" + taxonId + "' " 
 				+ " and pgost.namespace = '" + namespace + "' "
 				+ " and pgost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ " and goa.qualifier is null " + (withIEA ? "" : " and goec.code <> 'IEA' ")
+				+ " and goa.isnegation = false " + (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " group by pgost.identifier ";
 
 		return sqlQuery;
@@ -1390,7 +1391,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " join organism as org on org.id = g.organismid " 
 				+ " where org.taxonId = '" + taxonId + "' "
 				+ " and gost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.qualifier is null "
+				+ (withIEA ? "" : " and goec.code <> 'IEA' ") + " and goa.isnegation = false "
 				+ " group by gost.namespace ";
 		
 		return sql;
@@ -1412,7 +1413,7 @@ public class CalculateBioThemeBackground extends PostProcessor {
 				+ " where org.taxonId = '" + taxonId + "' " 
 				+ " and pgost.namespace = '" + namespace + "' "
 				+ " and pgost.identifier not in ('GO:0008150','GO:0003674','GO:0005575') "
-				+ " and goa.qualifier is null " + (withIEA ? "" : " and goec.code <> 'IEA' ")
+				+ " and goa.isnegation = false " + (withIEA ? "" : " and goec.code <> 'IEA' ")
 				+ " group by pgost.identifier ";
 		
 		return sqlQuery;

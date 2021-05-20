@@ -69,18 +69,18 @@
       <fieldconfig fieldExpr="strand"/>
     </fields>
   </class>
- <class className="org.intermine.model.bio.WHOTrial">
+ <!-- <class className="org.intermine.model.bio.WHOTrial">
     <fields>
       <fieldconfig fieldExpr="name"/>
       <fieldconfig fieldExpr="scientificTitle"/>
     </fields>
-  </class>
- <class className="org.intermine.model.bio.PharmaProject">
+  </class> -->
+ <!-- <class className="org.intermine.model.bio.PharmaProject">
     <fields>
       <fieldconfig fieldExpr="identifier"/>
       <fieldconfig fieldExpr="overview"/>
     </fields>
-  </class>
+  </class> -->
 
 
   <class className="org.intermine.model.bio.SequenceFeature">
@@ -736,6 +736,7 @@
       <fieldconfig fieldExpr="gene.primaryIdentifier"/>
       <fieldconfig fieldExpr="gene.symbol"/>
       <fieldconfig fieldExpr="snp.identifier"/>
+      <fieldconfig fieldExpr="function.name"/>
     </fields>
   </class>
 
@@ -743,8 +744,6 @@
     <fields>
       <fieldconfig fieldExpr="identifier"/>
       <fieldconfig fieldExpr="refSnpAllele"/>
-      <fieldconfig fieldExpr="orientation"/>
-      <fieldconfig fieldExpr="chromosome"/>
       <fieldconfig fieldExpr="location"/>
     </fields>
   </class>
@@ -767,13 +766,6 @@
     </fields>
   </class>
 
-  <class className="org.intermine.model.bio.SNPFunction">
-    <fields>
-      <fieldconfig fieldExpr="name"/>
-      <fieldconfig fieldExpr="description"/>
-    </fields>
-  </class>
-
   <class className="org.intermine.model.bio.SNPReference">
     <fields>
       <fieldconfig fieldExpr="function.name"/>
@@ -785,7 +777,8 @@
       <fieldconfig fieldExpr="proteinAccession"/>
       <fieldconfig fieldExpr="proteinPosition"/>
       <fieldconfig fieldExpr="residue"/>
-    </fields>
+      <fieldconfig fieldExpr="function.name"/>
+   </fields>
   </class>
 
   <class className="org.intermine.model.bio.GeneDiseasePair">
@@ -899,6 +892,17 @@
     </fields>
   </class>
 
+  <!-- <class className="org.intermine.model.bio.Mgend">
+    <fields>
+      <fieldconfig fieldExpr="variant.identifier"/>
+      <fieldconfig fieldExpr="alleleChange"/>
+      <fieldconfig fieldExpr="aminoAcidChange"/>
+      <fieldconfig fieldExpr="clinicalSignificance"/>
+      <fieldconfig fieldExpr="diseaseTerm.identifier"/>
+      <fieldconfig fieldExpr="diseaseTerm.name"/>
+    </fields>
+  </class> -->
+
   <class className="org.intermine.model.bio.Frequency">
     <fields>
       <fieldconfig fieldExpr="allele"/>
@@ -915,25 +919,26 @@
     </fields>
   </class>
 
-<!-- Start: Added by Ishikawa.Motokazu
-  <class className="org.intermine.model.bio.Biomarker">
+<!-- Start: Added by Ishikawa.Motokazu -->
+  <!-- <class className="org.intermine.model.bio.Biomarker">
     <fields>
       <fieldconfig fieldExpr="name"/>
       <fieldconfig fieldExpr="biomarkerType"/>
       <fieldconfig fieldExpr="chemicalNature"/>
+      <fieldconfig fieldExpr="diseaseType"/>
+      <fieldconfig fieldExpr="diseaseName"/>
     </fields>
-  </class>
--->
+  </class> -->
 <!-- End: Added by Ishikawa.Motokazu -->
 
 <!-- Start: Added by Rodolfo Allendes -->
-  <class className="org.intermine.model.bio.GeneGroup">
+  <!-- <class className="org.intermine.model.bio.GeneGroup">
     <fields>
       <fieldconfig fieldExpr="identifier"/>
       <fieldconfig fieldExpr="name"/>
       <fieldconfig fieldExpr="genes"/>
     </fields>
-  </class>
+  </class> -->
 
 <!-- End: Added by Rodolfo Allendes -->
 
@@ -1092,11 +1097,12 @@
                      replacesFields=""
                      placement="summary"
                      types="Gene" />
-
+<!--
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.PathwayGraphDisplayer"
                      jspName="model/pathwayGraphDisplayer.jsp"
                      replacesFields=""
                      types="Pathway" />
+-->
 
     
     <!-- <reportdisplayer javaClass="org.intermine.bio.web.displayer.CompositeNetworkThreeJSGraphBagDisplayer"
@@ -1158,7 +1164,7 @@
                                  views="primaryIdentifier, symbol, organism.name, integratedPathwayClusters.identifier, integratedPathwayClusters.name"
                                  externalLink="/targetmine/portal.do?class=IntegratedPathwayCluster&amp;externalids="/>
 
-      <enrichmentwidgetdisplayer id="gene_go_enrichment"
+      <!-- <enrichmentwidgetdisplayer id="gene_go_enrichment"
                                  title="Gene Ontology Enrichment"
                                  description="GO terms enriched for genes in this list. (IEA annotations are excluded)"
                                  label="GO Term"
@@ -1169,7 +1175,7 @@
                                  enrich="goAnnotation.ontologyTerm.parents.name"
                                  enrichIdentifier="goAnnotation.ontologyTerm.parents.identifier"
                                  constraints="goAnnotation.ontologyTerm.parents.namespace=[Ontology],organism.name=[list],
-                                              goAnnotation.qualifier = null,
+                                              goAnnotation.isNegation = false,
                                               goAnnotation.evidence.code.code != IEA,
                                               goAnnotation.ontologyTerm.parents.identifier != go:0008150,
                                               goAnnotation.ontologyTerm.parents.identifier != go:0003674,
@@ -1178,9 +1184,9 @@
                                  views="primaryIdentifier, symbol, organism.name,
                                        goAnnotation.ontologyTerm.parents.identifier,goAnnotation.ontologyTerm.parents.name"
                                  constraintsForView="goAnnotation.evidence.code.code != IEA"
-                                 externalLink="/targetmine/portal.do?class=GOTerm&amp;externalids="/>
+                                 externalLink="/targetmine/portal.do?class=GOTerm&amp;externalids="/> -->
 
-      <enrichmentwidgetdisplayer id="gene_goslim_enrichment"
+      <!-- <enrichmentwidgetdisplayer id="gene_goslim_enrichment"
                                  title="GOSlim Enrichment"
                                  description="GOSlim terms enriched for genes in this list. (IEA annotations are excluded)"
                                  label="GOSlim Term"
@@ -1191,7 +1197,7 @@
                                  enrich="goAnnotation.goSlimTerms.parents.name"
                                  enrichIdentifier="goAnnotation.goSlimTerms.parents.identifier"
                                  constraints="goAnnotation.goSlimTerms.parents.namespace=[Ontology],organism.name=[list],
-                                              goAnnotation.qualifier = null,
+                                              goAnnotation.isNegation = false,
                                               goAnnotation.evidence.code.code != IEA,
                                               goAnnotation.goSlimTerms.parents.identifier != go:0008150,
                                               goAnnotation.goSlimTerms.parents.identifier != go:0003674,
@@ -1200,7 +1206,7 @@
                                  views="primaryIdentifier, symbol, organism.name,
                                        goAnnotation.goSlimTerms.parents.identifier,goAnnotation.goSlimTerms.parents.name"
                                  constraintsForView="goAnnotation.evidence.code.code != IEA"
-                                 externalLink="/targetmine/portal.do?class=GOSlimTerm&amp;externalids="/>
+                                 externalLink="/targetmine/portal.do?class=GOSlimTerm&amp;externalids="/> -->
 
       <enrichmentwidgetdisplayer id="gene_disease_enrichment"
                                  title="Disease Enrichment"
@@ -1215,6 +1221,18 @@
                                  constraints="diseases.dataSet.name=[DataSet],organism.taxonId=[list]"
                                  typeClass="Gene"
                                  views="primaryIdentifier, symbol, organism.name, diseases.diseaseTerm.identifier, diseases.diseaseTerm.name"/>
+
+      <!-- <enrichmentwidgetdisplayer id="mgend_enrichment"
+                                 title="MGeND Enrichment"
+                                 description="MGeND disease enriched for genes in this list"
+                                 label="Disease term"
+                                 startClass="Gene"
+                                 startClassDisplay="symbol"
+                                 enrich="snps.snp.mgends.diseaseTerm.name"
+                                 enrichIdentifier="snps.snp.mgends.diseaseTerm.identifier"
+                                 constraints="organism.taxonId=[list]"
+                                 typeClass="Gene"
+                                 views="primaryIdentifier, symbol, organism.name, snps.snp.identifier, snps.snp.mgends.diseaseTerm.identifier, snps.snp.mgends.diseaseTerm.name"/> -->
 
       <enrichmentwidgetdisplayer id="protein_pathway_enrichment"
                                  title="Pathway Enrichment"
@@ -1244,7 +1262,7 @@
                                  views="primaryAccession, name, organism.name, genes.integratedPathwayClusters.identifier, genes.integratedPathwayClusters.name"
                                  externalLink="/targetmine/portal.do?class=IntegratedPathwayCluster&amp;externalids="/>
 
-      <enrichmentwidgetdisplayer id="protein_go_enrichment"
+      <!-- <enrichmentwidgetdisplayer id="protein_go_enrichment"
                                  title="Gene Ontology Enrichment"
                                  description="GO terms enriched for proteins in this list. (IEA annotations are excluded)"
                                  label="GO Term"
@@ -1255,7 +1273,7 @@
                                  enrich="goAnnotation.ontologyTerm.parents.name"
                                  enrichIdentifier="goAnnotation.ontologyTerm.parents.identifier"
                                  constraints="goAnnotation.ontologyTerm.parents.namespace=[Ontology],organism.name=[list],
-                                              primaryIdentifier != null, goAnnotation.qualifier = null,
+                                              primaryIdentifier != null, goAnnotation.isNegation = false,
                                               goAnnotation.evidence.code.code != IEA,
                                               goAnnotation.ontologyTerm.parents.identifier != go:0008150,
                                               goAnnotation.ontologyTerm.parents.identifier != go:0003674,
@@ -1264,9 +1282,9 @@
                                  views="primaryAccession, name, organism.name,
                                        goAnnotation.ontologyTerm.parents.identifier,goAnnotation.ontologyTerm.parents.name"
                                  constraintsForView="goAnnotation.evidence.code.code != IEA"
-                                 externalLink="/targetmine/portal.do?class=GOTerm&amp;externalids="/>
+                                 externalLink="/targetmine/portal.do?class=GOTerm&amp;externalids="/> -->
 
-      <enrichmentwidgetdisplayer id="protein_goslim_enrichment"
+      <!-- <enrichmentwidgetdisplayer id="protein_goslim_enrichment"
                                  title="GOSlim Enrichment"
                                  description="GOSlim terms enriched for proteins in this list. (IEA annotations are excluded)"
                                  label="GOSlim Term"
@@ -1277,7 +1295,7 @@
                                  enrich="goAnnotation.goSlimTerms.parents.name"
                                  enrichIdentifier="goAnnotation.goSlimTerms.parents.identifier"
                                  constraints="goAnnotation.goSlimTerms.parents.namespace=[Ontology],organism.name=[list],
-                                              goAnnotation.qualifier = null,
+                                              goAnnotation.isNegation = false,
                                               goAnnotation.evidence.code.code != IEA,
                                               goAnnotation.goSlimTerms.parents.identifier != go:0008150,
                                               goAnnotation.goSlimTerms.parents.identifier != go:0003674,
@@ -1286,7 +1304,7 @@
                                  views="primaryAccession, name, organism.name,
                                        goAnnotation.goSlimTerms.parents.identifier,goAnnotation.goSlimTerms.parents.name"
                                  constraintsForView="goAnnotation.evidence.code.code != IEA"
-                                 externalLink="/targetmine/portal.do?class=GOSlimTerm&amp;externalids="/>
+                                 externalLink="/targetmine/portal.do?class=GOSlimTerm&amp;externalids="/> -->
 
       <enrichmentwidgetdisplayer id="protein_disease_enrichment"
                                  title="Disease Enrichment"
@@ -1331,8 +1349,8 @@
                                  externalLink="http://www.cathdb.info/cathnode/"/>
 
       <enrichmentwidgetdisplayer id="protein_compound_enrichment"
-                                 title="Compound Enrichment"
-                                 description="Compound enriched for proteins in this list."
+                                 title="Interacting Compound Enrichment"
+                                 description="Interacting compounds enriched for proteins in this list."
                                  label="Compounds"
                                  filterLabel="DataSet"
                                  filters="DrugBank,ChEMBL,BioAssay,Ligand Expo,All"
@@ -1374,8 +1392,8 @@
                                  externalLink="http://www.cathdb.info/cathnode/"/>
 
       <enrichmentwidgetdisplayer id="gene_compound_enrichment"
-                                 title="Compound Enrichment"
-                                 description="Compound enriched for genes in this list."
+                                 title="Interacting Compound Enrichment"
+                                 description="Interacting compounds enriched for genes in this list."
                                  label="Compounds"
                                  filterLabel="DataSet"
                                  filters="DrugBank,ChEMBL,BioAssay,Ligand Expo,All"
