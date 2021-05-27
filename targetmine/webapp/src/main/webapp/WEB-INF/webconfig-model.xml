@@ -951,11 +951,11 @@
                      placement="Genes"
                      types="Gene"/>
 
-    <reportdisplayer javaClass="org.intermine.bio.web.displayer.CytoscapeNetworkDisplayer"
+    <!-- <reportdisplayer javaClass="org.intermine.bio.web.displayer.CytoscapeNetworkDisplayer"
                      jspName="model/cytoscapeNetworkDisplayer.jsp"
                      replacesFields="interactions"
                      placement="Interactions"
-                     types="Gene"/>
+                     types="Gene"/> -->
 
 	<!-- temporary solution for protein interaction -->
     <reportdisplayer javaClass="org.intermine.bio.web.displayer.CytoscapeNetworkDisplayer"

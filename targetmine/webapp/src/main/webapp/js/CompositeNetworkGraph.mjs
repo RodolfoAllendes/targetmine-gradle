@@ -3,6 +3,9 @@ import { TargetMineGraph } from "./TargetMineGraph.mjs";
 import { MultiLayerNetwork } from "./MultiLayerNetwork.mjs";
 
 import { CompositeNetworkCytoscapeGraph } from './CompositeNetworkCytoscapeGraph.mjs';
+// import { CompositeNetwork3dsGraph } from "./CompositeNetwork3dsGraph.mjs";
+// import { CompositeNetworkSAMGraph } from "./CompositeNetworkSAMGraph.mjs";
+// import { CompositeNetworkThreeJSGraph } from "./CompositeNetworkThreeJSGraph.mjs";
 
 /**
  * @class CompositeNetworkGraph
@@ -24,43 +27,41 @@ export class CompositeNetworkGraph extends TargetMineGraph{
    * @param {int} height the height of the visualization
    * @param {string} rootClass the class to which the initial elements belong to
    */
-  constructor(name, data, containerId, width, height,
-    rootClass,){
-    // collections){
-    /* initialize super class attributes */
+  constructor(name, data, containerId, width, height, rootClass,){
+    // initialize super class attributes
     super('compositeNetwork');
     super.setName(name);
     super.setContainerId(containerId);
     super.setWidth(width);
     super.setHeight(height);
 
-    /* and class attributes */
+    // and class attributes 
     this._service = new intermine.Service({root:'https://targetmine.mizuguchilab.org/targetmine'});
     this._network = new MultiLayerNetwork();
     
-    /* initialize the root class */
+    // initialize the root class 
     this._rootClass = rootClass.substr(rootClass.lastIndexOf('.')+1);
-
+    // and the type of visualization to use
     this._visualization = undefined;
+    this._displays =[ 'Cytoscape', '3DS', 'SupraAdjacencyMatrix', 'threeJS'];
     
-    /* retrieve the underlying biological model from the service */
+    // retrieve the underlying biological model from the service 
     this._service.fetchModel()
       .then( model => {
         this._model = model; 
-        /* once we have the model, we load the initial data directly from the DB */
+        // once we have the model, we load the initial data directly from the DB
         return this.loadData(data);
       })
       .then( (loadDataValue ) => {
-        // Once the initial data has been loaded, it is possible to initialize 
-        // general, static DOM elements
+        // after data loading, we initialize DOM elements
         return this.initDOM(); 
       }).then( () => {
-        // and dynamic DOM elements (this will also change as result of user
-        // interaction
-      //   return this.updateLayersDOM();
-      // }).then( () => {  
-        // finally, we plot the network
-        this.plot();
+        // then, we initialize visualization display
+        return this.initVisualization('Cytoscape');
+      }).then( () => {
+        // finally, we plot the initial version of the network
+        if( this._visualization !== undefined )
+          this._visualization.plot(this._network);
       });
   }
 
@@ -94,7 +95,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     query.adjustPath( this._rootClass );
     query.select( attributes );
     query.addConstraint({ path: this._rootClass, op: "LOOKUP", value: this._data },)
-    console.log(query);
     
     // run the query and store the results in the initial layer of the network
     const rows = await this._service.rows(query);
@@ -133,16 +133,14 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   async initDOM(){
     let self = this;
     const elements = [
-      // main visualization area
-      { id: `canvas_${this._type}`, type: 'div', 
-        attributes: new Map([ ['class', 'targetmineGraphCytoscape'] ])
-      },
       // right side controlers
       { id: `rightColumn_${this._type}`, type: 'div',
         attributes: new Map([ ['class', 'rightColumn'] ]),
         children:[
           { id: 'layers-div', type: 'div', 
             children: [
+              { id: 'label-display', type: 'label', attributes: new Map([ ['text', 'Select Display:'] ])},
+              { id: 'table-display', type: 'table' }, 
               { id: 'label-layer', type: 'label', attributes: new Map([ ['text', 'Layers:'] ])},
               { id: 'table-layer', type: 'table' },
               { id: 'layer-button-add', type: 'button', 
@@ -150,7 +148,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
                 on: new Map([ ['click', function(){ self.modalDisplay('compositeNetworkGraphModal')}] ])
               }
             ]
-          },
+          }
         ]
       },
       // modal for addition of layers
@@ -162,16 +160,7 @@ export class CompositeNetworkGraph extends TargetMineGraph{
             children:[
               { id: 'modal-title', type: 'h3', attributes: new Map([ ['class', 'modal-title'], ['text','Source:'] ]) },
               { id: 'modal-label-sourceLayer', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Layer:'] ]) },
-              { id: 'modal-select-sourceLayer', type: 'select', 
-                attributes: new Map([ ['class','modal-item modal-select'] ]),
-                on: new Map([ ['change',function(e){
-                  let opts = self._network.getLayers().get(e.target.value).attributes;
-                  self.modalSelectOptions('modal-select-sourceAttr', opts.sort()); 
-
-                  opts = Object.keys(self._model.classes[e.target.value].collections);
-                  self.modalSelectOptions('modal-select-targetLayer', opts.sort());
-                }] ])
-              },
+              
               { id: 'modal-label-sourceAttr', type: 'label', attributes: new Map([ ['class','modal-item modal-label'], ['text','Attribute:'] ]) },
               { id: 'modal-select-sourceAttr', type: 'select', attributes: new Map([ ['class','modal-item modal-select'] ]) },
               { id: 'modal-title', type: 'h3', attributes: new Map([ ['class', 'modal-title'], ['text','Target:'] ]) },
@@ -203,37 +192,31 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     ];
 
     await super.addToDOM(this._containerId, elements);
+    await this.updateDisplaysDOM();
     await this.updateLayersDOM();
-
-    /* initialize the properties of the Cytoscape container */
-    this._cy = cytoscape({
-      container: jQuery('.targetmineGraphCytoscape'),
-      style:[
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'shape': 'data(shape)',
-            'background-color': 'data(color)',
-            'border-color': 'data(borderColor)',
-            'border-width': '1px',
-            'display': 'element',
-          }
-        }
-      ],
-    });
   }
 
   async initVisualization(viz){
-    switch( viz ){
-      case 'cytoscape':
+    switch( viz ){  
+      case 'Cytoscape':
         this._visualization = new CompositeNetworkCytoscapeGraph();
         break;
+      // case '3DS':
+      //   this._visualization = new CompositeNetwork3dsGraph();
+      //   break;
+      // case 'SupraAdjacencyMatrix':
+      //   this._visualization = new CompositeNetworkSAMGraph();
+      //   break;
+      // case 'ThreeJS':
+      //   this._visualization = new CompositeNetworkThreeJSGraph();
+      //   break;
       default:
         this._visualization = new CompositeNetworkCytoscapeGraph();
     }
+    let eles = this._visualization.getVisualizationDOM();
+    await super.addToDOM(this._containerId, eles);
+    await this._visualization.setVisualizationSpace();
+    
   }
 
   /**
@@ -368,81 +351,25 @@ export class CompositeNetworkGraph extends TargetMineGraph{
   /**
    * 
    */
-  runQuery(from, select, where){
-    // we will add the core elements (those coming directly from the original
-    // bag) to a new layer
-    let self = this;
-    let query = {
-      from: from,
-      select: select, 
-      where: where, 
-    };
-
-    // let query = new imjs.Query();
-
-    return new Promise( resolve => {
-      resolve(self._service.rows(query));
-    }).then(rows => {
-      
-      rows.forEach(row => { 
-        console.log(row);
-        let id = row[0];
-        let attributes = {};
-        select.forEach(function(d,i){
-          if(i > 0)
-            attributes[d] = row[i];
-        });
-        console.log(id, attributes);
-        self._network.addNode(from, id, attributes);
+  async updateDisplaysDOM(){
+    let child = [];
+    this._displays.forEach( k => {
+      child.push({
+        type: 'option',
+        id: `opt-${k}`,
+        attributes: new Map([ ['value', k], ['text', k] ]),
       });
-
-    }).then( ()=> { self.plot(); });
-
-
-    // }).then( () => {
-    //   let hcdpQuery = {
-    //     from: 'Gene',
-    //     select: [
-    //       'ncbiGeneId',
-    //       'interactions.gene2.ncbiGeneId',
-    //       'interactions.gene2.symbol'
-    //     ],
-    //     where:[
-    //       { path: 'Gene', op: "LOOKUP", value: this._data },
-    //       { path: 'interactions.confidences.type', op: '=', value: 'HCDP' }
-    //     ]
-    //   };
-    //   return new Promise( resolve => {
-    //     resolve(self._service.rows(hcdpQuery))
-    //   }).then( rows => {
-    //     this.addNodesFromResults(rows, 'Gene');
-    //     this.addEdgesFromResults(rows);
-    //   });
-
-    // }).then( () => {
-    //   this._network.addLayer('TranscriptionFactor', 'LightBlue' , 'rectangle');
-    //   let tfQuery = {
-    //   from: 'Gene',
-    //     select: [
-    //       'transcriptionalRegulations.targetGene.ncbiGeneId',
-    //       'ncbiGeneId',
-    //       'symbol'
-    //     ],
-    //     where:[
-    //       { path: 'transcriptionalRegulations.targetGene', op: "LOOKUP", value: this._data },
-    //       { path: 'transcriptionalRegulations.dataSets.name', op: "!=", value: "ENCODE ChIP-seq data" }
-    //     ]
-    //   };
-    //   return new Promise( resolve => {
-    //     resolve(self._service.rows(tfQuery))
-    //   }).then( rows => {
-    //     this.addNodesFromResults(rows, 'TranscriptionFactor');
-    //     this.addEdgesFromResults(rows);
-    //   });
-    // });
+    });
+    let elements = [
+      { id: 'select-display', type: 'select',
+        children: child,
+        on: new Map([ ['change',function(e){
+          console.log(e.target.value);
+        }] ])
+      }
+    ];
+    super.addToDOM('table-display', elements);
   }
-
-
 
   /**
    * Given the current layers in the netork, display the appropriate elements
@@ -464,34 +391,6 @@ export class CompositeNetworkGraph extends TargetMineGraph{
     }
     
     super.addToDOM('table-layer', elements);
-  }
-
-  /**
-   * Add the nodes that result from the query to the network and the cytoscape
-   */
-  addNodesFromResults(rows, layer){
-    rows.forEach(row => {
-      this._network.addNode(row[1], row[2], layer);
-    });
-  }
-
-  /**
-   *
-   */
-  addEdgesFromResults(rows){
-    rows.forEach( row => {
-      this._network.addEdge(row[0]+'-'+row[1],row[0], row[1]);
-    });
-  }
-
-  /**
-   * Plot the elements of the MultiLayer Network
-   */
-  plot(){
-    let eles = this._network.getCytoscapeElements();
-    this._cy.add( eles );
-    this._cy.layout({name: 'cose'}).run();
-    
   }
 
 }
